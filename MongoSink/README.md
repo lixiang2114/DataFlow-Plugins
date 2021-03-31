@@ -3,12 +3,12 @@ Mongo发送器可以将来自上游通道的数据记录发送到MongoDB单点�
 ​      
 
 ### 下载与安装  
-wget https://github.com/lixiang2114/LogCollector-Plugins/raw/main/MongoSink/dst/mongoSink.zip -d /install/zip/  
-unzip  /install/zip/mongoSink.zip -d /software/LogCollector-2.0/plugins/    
+wget https://github.com/lixiang2114/DataFlow-Plugins/raw/main/MongoSink/dst/mongoSink.zip -d /install/zip/  
+unzip  /install/zip/mongoSink.zip -d /software/DataFlow-3.0/plugins/    
 
 ##### 备注：  
 插件配置路径：  
- /software/LogCollector-2.0/plugins/mongoSink/sink.properties  
+ /software/DataFlow-3.0/plugins/mongoSink/sink.properties  
 ​      
 
 ### 参数值介绍  

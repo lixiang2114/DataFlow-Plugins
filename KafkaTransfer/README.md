@@ -4,12 +4,12 @@ KafKa转存器可以实时拉取KafKa消息中间件服务的数据并将其转�
 ​      
 
 ### 下载与安装  
-wget https://github.com/lixiang2114/LogCollector-Plugins/raw/main/KafkaTransfer/dst/kafkaTransfer.zip -d /install/zip/  
-unzip  /install/zip/kafkaTransfer.zip -d /software/LogCollector-2.0/plugins/    
+wget https://github.com/lixiang2114/DataFlow-Plugins/raw/main/KafkaTransfer/dst/kafkaTransfer.zip -d /install/zip/  
+unzip  /install/zip/kafkaTransfer.zip -d /software/DataFlow-3.0/plugins/    
 
 ##### 备注：  
 插件配置路径：  
- /software/LogCollector-2.0/plugins/kafkaTransfer/transfer.properties  
+ /software/DataFlow-3.0/plugins/kafkaTransfer/transfer.properties  
 ​      
 ### 参数值介绍  
 |参数名称|参数含义|缺省默认|备注说明|

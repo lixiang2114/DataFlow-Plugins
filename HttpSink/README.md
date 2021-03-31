@@ -3,13 +3,13 @@ HTTP发送器可以将来自上游通道的数据记录发送到基于HTTP协议
 ​      
 
 ### 下载与安装  
-wget https://github.com/lixiang2114/LogCollector-Plugins/raw/main/HttpSink/dst/httpSink.zip -d /install/zip/  
-unzip  /install/zip/httpSink.zip -d /software/LogCollector-2.0/plugins/    
+wget https://github.com/lixiang2114/DataFlow-Plugins/raw/main/HttpSink/dst/httpSink.zip -d /install/zip/  
+unzip  /install/zip/httpSink.zip -d /software/DataFlow-3.0/plugins/    
 
 ##### 备注：  
 插件配置路径：  
- /software/LogCollector-2.0/plugins/httpSink/sink.properties  
-​      
+ /software/DataFlow-3.0/plugins/httpSink/sink.properties  
+      
 
 ### 参数值介绍  
 |参数名称|参数含义|缺省默认|备注说明|

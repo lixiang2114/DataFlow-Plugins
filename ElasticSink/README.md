@@ -3,12 +3,12 @@ Elastic发送器可以将来自上游通道的数据记录发送到Elastic单点
       
 
 ### 下载与安装  
-wget https://github.com/lixiang2114/LogCollector-Plugins/raw/main/ElasticSink/dst/elasticSink.zip -d /install/zip/  
-unzip  /install/zip/elasticSink.zip -d /software/LogCollector-2.0/plugins/    
+wget https://github.com/lixiang2114/DataFlow-Plugins/raw/main/ElasticSink/dst/elasticSink.zip -d /install/zip/  
+unzip  /install/zip/elasticSink.zip -d /software/DataFlow-3.0/plugins/    
 
 ##### 备注：  
 插件配置路径：  
- /software/LogCollector-2.0/plugins/elasticSink/sink.properties  
+ /software/DataFlow-3.0/plugins/elasticSink/sink.properties  
       
 
 ### 参数值介绍  

@@ -3,12 +3,12 @@
 ​      
 
 ### 下载与安装  
-wget https://github.com/lixiang2114/LogCollector-Plugins/raw/main/FileSink/dst/fileSink.zip -d /install/zip/  
-unzip  /install/zip/fileSink.zip -d /software/LogCollector-2.0/plugins/    
+wget https://github.com/lixiang2114/DataFlow-Plugins/raw/main/FileSink/dst/fileSink.zip -d /install/zip/  
+unzip  /install/zip/fileSink.zip -d /software/DataFlow-3.0/plugins/    
 
 ##### 备注：  
 插件配置路径：  
- /software/LogCollector-2.0/plugins/fileSink/sink.properties  
+ /software/DataFlow-3.0/plugins/fileSink/sink.properties  
 ​      
 
 ### 参数值介绍  

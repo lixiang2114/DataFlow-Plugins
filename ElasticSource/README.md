@@ -3,12 +3,12 @@ Elastic收集器用于离线读取Elasticsearch索引库中的数据，并将获
 ​      
 
 ### 下载与安装  
-wget https://github.com/lixiang2114/LogCollector-Plugins/raw/main/ElasticSource/dst/elasticSource.zip -d /install/zip/  
-unzip  /install/zip/elasticSource.zip -d /software/LogCollector-2.0/plugins/    
+wget https://github.com/lixiang2114/DataFlow-Plugins/raw/main/ElasticSource/dst/elasticSource.zip -d /install/zip/  
+unzip  /install/zip/elasticSource.zip -d /software/DataFlow-3.0/plugins/    
 
 ##### 备注：  
 插件配置路径：  
- /software/LogCollector-2.0/plugins/elasticSource/source.properties  
+ /software/DataFlow-3.0/plugins/elasticSource/source.properties  
 ​      
 
 ### 参数值介绍  

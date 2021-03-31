@@ -3,12 +3,12 @@ SQL收集器用于近实时扫描SQL关系数据库中的数据，并将获取�
 ​      
 
 ### 下载与安装  
-wget https://github.com/lixiang2114/LogCollector-Plugins/raw/main/SqlSource/dst/sqlSource.zip -d /install/zip/  
-unzip  /install/zip/sqlSource.zip -d /software/LogCollector-2.0/plugins/    
+wget https://github.com/lixiang2114/DataFlow-Plugins/raw/main/SqlSource/dst/sqlSource.zip -d /install/zip/  
+unzip  /install/zip/sqlSource.zip -d /software/DataFlow-3.0/plugins/    
 
 ##### 备注：  
 插件配置路径：  
- /software/LogCollector-2.0/plugins/sqlSource/source.properties  
+ /software/DataFlow-3.0/plugins/sqlSource/source.properties  
 ​      
 
 ### 参数值介绍  

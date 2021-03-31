@@ -4,12 +4,12 @@ HTTP转存器可以将来自WEB客户端程序主动推送的数据转存到缓�
 ​      
 
 ### 下载与安装  
-wget https://github.com/lixiang2114/LogCollector-Plugins/raw/main/HttpTransfer/dst/httpTransfer.zip -d /install/zip/  
-unzip  /install/zip/httpTransfer.zip -d /software/LogCollector-2.0/plugins/    
+wget https://github.com/lixiang2114/DataFlow-Plugins/raw/main/HttpTransfer/dst/httpTransfer.zip -d /install/zip/  
+unzip  /install/zip/httpTransfer.zip -d /software/DataFlow-3.0/plugins/    
 
 ##### 备注：  
 插件配置路径：  
- /software/LogCollector-2.0/plugins/httpTransfer/transfer.properties  
+ /software/DataFlow-3.0/plugins/httpTransfer/transfer.properties  
 ​      
 
 ### 参数值介绍  

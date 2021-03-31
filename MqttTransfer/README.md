@@ -4,12 +4,12 @@ MQTT转存器可以将来自基于MQTT协议消息中间件的实时数据主动
 ​      
 
 ### 下载与安装  
-wget https://github.com/lixiang2114/LogCollector-Plugins/raw/main/MqttTransfer/dst/mqttTransfer.zip -d /install/zip/  
-unzip  /install/zip/mqttTransfer.zip -d /software/LogCollector-2.0/plugins/    
+wget https://github.com/lixiang2114/DataFlow-Plugins/raw/main/MqttTransfer/dst/mqttTransfer.zip -d /install/zip/  
+unzip  /install/zip/mqttTransfer.zip -d /software/DataFlow-3.0/plugins/    
 
 ##### 备注：  
 插件配置路径：  
- /software/LogCollector-2.0/plugins/mqttTransfer/transfer.properties  
+ /software/DataFlow-3.0/plugins/mqttTransfer/transfer.properties  
 ​      
 
 ### 参数值介绍  

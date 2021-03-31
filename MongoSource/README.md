@@ -3,12 +3,12 @@ Mongo收集器用于近实时扫描MongoDB数据库表，并将获取的数据�
 ​      
 
 ### 下载与安装  
-wget https://github.com/lixiang2114/LogCollector-Plugins/raw/main/MongoSource/dst/mongoSource.zip -d /install/zip/  
-unzip  /install/zip/mongoSource.zip -d /software/LogCollector-2.0/plugins/    
+wget https://github.com/lixiang2114/DataFlow-Plugins/raw/main/MongoSource/dst/mongoSource.zip -d /install/zip/  
+unzip  /install/zip/mongoSource.zip -d /software/DataFlow-3.0/plugins/    
 
 ##### 备注：  
 插件配置路径：  
- /software/LogCollector-2.0/plugins/mongoSource/source.properties  
+ /software/DataFlow-3.0/plugins/mongoSource/source.properties  
 ​      
 
 ### 参数值介绍  
