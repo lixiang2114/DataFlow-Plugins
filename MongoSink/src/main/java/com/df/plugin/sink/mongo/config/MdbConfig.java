@@ -283,7 +283,7 @@ public class MdbConfig {
 		String[] hosts=hostListStr.isEmpty()?new String[]{"127.0.0.1:27017"}:COMMA_REGEX.split(hostListStr);
 		for(int i=0;i<hosts.length;i++){
 			String host=hosts[i].trim();
-			if(0==host.length()) continue;
+			if(host.isEmpty()) continue;
 			String[] ipAndPort=COLON_REGEX.split(host);
 			if(ipAndPort.length>=2){
 				String ip=ipAndPort[0].trim();
