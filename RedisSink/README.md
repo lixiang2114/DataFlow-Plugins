@@ -16,17 +16,17 @@ unzip  /install/zip/redisSink.zip -d /software/DataFlow-3.0/plugins/
 |:-----:|:-------:|:-------:|:-------:|
 |parse|是否解析|true|默认值为true表示解析数据记录为字典，否则按json字串反编译为字典|
 |dbIndex|数据库索引|0|当targetArch=single时，指示在Redis例程中操作的数据库|
-|hostList|连接地址列表|127.0.0.1:6379|用于连接Redis服务端的地址(单点)或地址列表(集群)|
-|passWord|Redis密码|无|当Redis例程需要登录认证时，指定登录Redis例程的密码|
-|targetType|存储结构|dict|Redis数据存储类型，可选值：dict(字典)、pipe(管道)|
-|targetArch|Redis架构|cluster|Redis的部署架构，可选值：single(单点)、cluster(集群)|
+|hostList|连接地址列表|127.0.0.1:6379|用于本插件连接Redis服务端的地址(单点)或地址列表(集群)|
+|passWord|Redis密码|无|当Redis例程服务需要登录认证时，指定登录Redis例程的密码|
+|targetType|存储结构|dict|Redis例程的数据存储类型，可选值：dict(字典)、pipe(管道)|
+|targetArch|Redis架构|cluster|Redis例程的部署架构，可选值：single(单点)、cluster(集群)|
 |targetField|存储字段|targetObject|当parse=false时，指示通道记录中表针目标存储对象名的字段名|
 |targetIndex|存储索引|0|当parse=true时，指示通道记录中表针目标存储对象名的索引|
 |maxRedirect|最大重定向|集群节点数-1|当targetArch=cluster时，指示为键寻找目标节点的最大重定向次数|
-|defaultTarget|默认存储|all|当未指定目标存储对象名时，默认使用的存储对象名|
-|fieldSeparator|字段分隔符|#|parse=true时，用于解析上游通道数据记录的字段分隔符|
-|maxRetryTimes|重试次数|3|插入数据记录到Redis缓存失败后的最大重试次数|
-|failMaxTimeMills|失败等待|2000|前后两次重试之间等待的最大时间间隔(单位:毫秒)|
+|defaultTarget|默认存储|all|默认的存储对象名，当targetType=dict时，all表示Redis全局缓存|
+|fieldSeparator|字段分隔符|#|当parse=true时，本插件用于解析上游通道数据记录的字段分隔符|
+|maxRetryTimes|重试次数|3|本插件插入数据记录到Redis缓存例程服务失败后的最大重试次数|
+|failMaxTimeMills|失败等待|2000|插入失败后，本插件前后两次重试之间等待的最大时间间隔(单位:毫秒)|
 ##### 备注：  
 hostList参数值可以有多项，项与项之间使用英文逗号分隔即可，如果对接的存储例程为哨兵集群，那么不支持使用密码认证登录Redis服务端，关于上游通道的输入格式举例如下：  
 ```Text
