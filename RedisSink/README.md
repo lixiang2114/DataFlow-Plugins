@@ -28,7 +28,7 @@ unzip  /install/zip/redisSink.zip -d /software/DataFlow-3.0/plugins/
 |maxRetryTimes|重试次数|3|本插件插入数据记录到Redis缓存例程服务失败后的最大重试次数|
 |failMaxTimeMills|失败等待|2000|插入失败后，本插件前后两次重试之间等待的最大时间间隔(单位:毫秒)|
 ##### 备注：  
-hostList参数值可以有多项，项与项之间使用英文逗号分隔即可，如果对接的存储例程为哨兵集群，那么不支持使用密码认证登录Redis服务端，关于上游通道的输入格式举例如下：  
+hostList参数值可以有多项，项与项之间使用英文逗号分隔即可；鉴于目前系统框架集成的是Netty5，Lettuce需要Netty4.X的支持，而Netty5又不能向前兼容到Netty4版本，故RedisTemplate底层通信组件选用的是JedisCluster，相较于Lettuce而言，JedisCluster不支持异步事件和哨兵集群，故使用本插件时不要将其对接到哨兵集群的例程上；本插件关于上游通道的输入格式举例如下：  
 ```Text
 1、推送到管道
 1.1、parse=true输入格式举例:

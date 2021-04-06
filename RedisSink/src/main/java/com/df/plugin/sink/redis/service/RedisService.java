@@ -3,7 +3,6 @@ package com.df.plugin.sink.redis.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map.Entry;
 
 import org.slf4j.Logger;
@@ -48,26 +47,11 @@ public class RedisService {
 			RedisMapper redisMapper=(RedisMapper)object;
 			boolean isSuc=false;
 			if(RedisType.dict==redisMapper.targetType) {
-				isSuc=sendMap(redisMapper.target,(HashMap<String,Object>)redisMapper.message);
+				isSuc=sendMapMsg(redisMapper.target,(HashMap<String,Object>)redisMapper.message);
 			}else{
 				String target=redisMapper.target;
-				List<HashMap<String, Object>> msgList=(List<HashMap<String, Object>>)redisMapper.message;
-				
-				int index=-1;
-				int len=msgList.size();
-				for(int i=0;i<len;i++) {
-					if(!sendRecord(target, msgList.get(i))) {
-						break;
-					}
-					index=i;
-				}
-				
-				if(index+1==len) {
-					isSuc=true;
-				}else{
-					isSuc=false;
-					redisMapper.message=msgList.subList(index+1, len);
-				}
+				ArrayList<Object> msgList=(ArrayList<Object>)redisMapper.message;
+				isSuc=sendRecord(target, msgList.toArray(new Object[msgList.size()]));
 			}
 			
 			if(!isSuc) return false;
@@ -93,21 +77,37 @@ public class RedisService {
 			return true;
 		}
 		
+		if(CommonUtil.isNotDictJson(message)) {
+			log.error("message: {} is not an dictory...",message);
+			return true;
+		}
+		
 		HashMap<String,Object> messageMap=CommonUtil.jsonStrToJava(message, HashMap.class);
 		if(null==messageMap || messageMap.isEmpty()) {
 			log.error("dict message: {} transfer to messageMap is null or empty...",message);
 			return true;
 		}
 		
+		return sendMapMsg(target,messageMap);
+	}
+	
+	/**
+	 * 发送字典消息
+	 * @param target 目标字典
+	 * @param messageMap 字典对象
+	 * @return 是否发送成功
+	 * @throws Exception
+	 */
+	private boolean sendMapMsg(String target,HashMap<String,Object> messageMap) throws Exception{
 		ArrayList<String> sucKeys=new ArrayList<String>();
 		if("all".equals(target)) {
 			for(Entry<String, Object> entry:messageMap.entrySet()) {
 				String key=entry.getKey();
-				if(!sendKeyVal(key,entry.getValue())) break;
+				if(!singleSendMap(key,entry.getValue())) break;
 				sucKeys.add(key);
 			}
 		}else{
-			if(sendMap(target, messageMap)) sucKeys.addAll(messageMap.keySet());
+			if(batchSendMap(target, messageMap)) sucKeys.addAll(messageMap.keySet());
 		}
 		
 		if(sucKeys.size()==messageMap.size()) return true;
@@ -125,7 +125,7 @@ public class RedisService {
 	 * @return 是否发送成功
 	 * @throws Exception
 	 */
-	private boolean sendKeyVal(String target,Object message) throws Exception{
+	private boolean singleSendMap(String target,Object message) throws Exception{
 		boolean loop=false;
 		int times=0;
 		do{
@@ -149,7 +149,7 @@ public class RedisService {
 	 * @return 是否发送成功
 	 * @throws Exception
 	 */
-	private boolean sendMap(String target,HashMap<String,Object> messageMap) throws Exception{
+	private boolean batchSendMap(String target,HashMap<String,Object> messageMap) throws Exception{
 		boolean loop=false;
 		int times=0;
 		do{
@@ -183,10 +183,16 @@ public class RedisService {
 			return true;
 		}
 		
-		List<HashMap<String,Object>> msgList=new ArrayList<HashMap<String,Object>>();
+		ArrayList<Object> msgList=new ArrayList<Object>();
 		String[] messages=redisConfig.fieldSeparatorRegex.split(message);
 		try{
-			for(int i=0;i<messages.length;msgList.add(CommonUtil.jsonStrToJava(messages[i++], HashMap.class)));
+			for(String msgItem:messages) {
+				if(CommonUtil.isNotJson(msgItem)) {
+					msgList.add(msgItem);
+				}else{
+					msgList.add(CommonUtil.jsonStrToJava(msgItem, Object.class));
+				}
+			}
 		}catch(Exception e) {
 			log.error("pipe messages transfer to messageMap occur exception...",Arrays.toString(messages));
 		}
@@ -196,32 +202,24 @@ public class RedisService {
 			return true;
 		}
 		
-		int index=-1;
-		int len=msgList.size();
-		for(int i=0;i<len;i++) {
-			if(!sendRecord(target, msgList.get(i))) break;
-			index=i;
-		}
-		
-		if(len==index+1) return true;
-		redisConfig.preFailSinkSet.add(new RedisMapper(target,msgList.subList(index+1, len),redisConfig.targetType));
-		
+		if(sendRecord(target, msgList.toArray(new Object[msgList.size()]))) return true;
+		redisConfig.preFailSinkSet.add(new RedisMapper(target,msgList,redisConfig.targetType));
 		return false;
 	}
 	
 	/**
-	 * 发送单个记录
-	 * @param target 目标对象
-	 * @param message 消息内容
+	 * 批量发送记录到目标管道
+	 * @param target 目标管道
+	 * @param messages 消息内容
 	 * @return 是否发送成功
 	 * @throws Exception
 	 */
-	private boolean sendRecord(String target,Object message) throws Exception{
+	private boolean sendRecord(String target,Object... messages) throws Exception{
 		boolean loop=false;
 		int times=0;
 		do{
 			try{
-				RedisUtil.leftPush(target, message);
+				RedisUtil.leftPush(target, messages);
 				loop=false;
 			}catch(Exception e) {
 				times++;
@@ -262,6 +260,12 @@ public class RedisService {
 			
 			return retArr;
 		}else{
+			if(CommonUtil.isNotDictJson(line)) {
+				retArr[0]=config.defaultTarget;
+				retArr[1]=line;
+				return retArr;
+			}
+			
 			HashMap<String,Object> recordMap=CommonUtil.jsonStrToJava(line, HashMap.class);
 			String target=(String)recordMap.remove(config.targetField);
 			String record=CommonUtil.javaToJsonStr(recordMap);

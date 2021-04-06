@@ -2,8 +2,8 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.df.plugin.sink.redis</groupId>
-  <artifactId>RedisSink</artifactId>
+  <groupId>com.df.plugin.transfer.redis</groupId>
+  <artifactId>RedisTransfer</artifactId>
   <version>1.0</version>
   <packaging>jar</packaging>
   
@@ -13,7 +13,7 @@
 	<version>2.1.15.RELEASE</version>
   </parent>
 
-  <name>RedisSink</name>
+  <name>RedisTransfer</name>
   <url>http://maven.apache.org</url>
 
   <properties>
