@@ -69,11 +69,6 @@ public class RedisConfig {
 	public RedisArch targetArch;
 	
 	/**
-	 * Redis主机列表
-	 */
-	private ArrayList<Host> hostList=new ArrayList<Host>();
-	
-	/**
 	 * 转存目录
 	 */
 	public File transferPath;
@@ -97,6 +92,11 @@ public class RedisConfig {
 	 * 转存日志文件最大尺寸
 	 */
 	public Long transferSaveMaxSize;
+	
+	/**
+	 * Redis主机列表
+	 */
+	private ArrayList<Host> hostList=new ArrayList<Host>();
 	
 	/**
 	 * 英文冒号正则式
