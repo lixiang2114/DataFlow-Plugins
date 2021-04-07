@@ -16,16 +16,16 @@ unzip  /install/zip/flowSink.zip -d /software/DataFlow-3.0/plugins/
 ### 参数值介绍  
 |参数名称|参数含义|缺省默认|备注说明|
 |:-----:|:-------:|:-------:|:-------:|
-|sendMode|转发模式|rep|可选值:rep、field、custom、hash、robin、random|
-|targetFileMaxSize|文件尺寸|2GB|转存目标文件最大尺寸，超过该尺寸，文件名按数字递增滚动|
-|dispatcherItems|转发目标项|无|转发列表为一到多个使用英文逗号分隔的项，目标可以是磁盘文件或流程实例|
-|rule|键字规则|index|sendMode=field时，用于查找目标项的记录行键字规则，可选值:index、key|
 |key|目标键字|flows|rule=key时，用于查找目标项的键字值|
+|rule|键字规则|index|sendMode=field时，用于查找目标项的记录行键字规则，可选值:index、key|
 |index|目标索引|0|rule=index时，用于查找目标项的索引值|
-|itemSeparator|项目分隔符|#|sendMode=field时，用于分隔目标项的分隔符|
-|fieldSeparator|字段分隔符|,|rule=index时，用于分隔记录中字段的分隔符|
+|sendMode|转发模式|rep|可选值:rep、field、custom、hash、robin、random|
 |mainClass|入口类名|DefaultClass|sendMode=custom时，用于定义动态脚本的入口类全名|
 |mainMethod|入口方法|main|sendMode=custom时，用于定义动态脚本的入口函数名|
+|fieldSeparator|字段分隔符|,|rule=index时，用于分隔记录中字段的分隔符|
+|itemSeparator|项目分隔符|#|sendMode=field时，用于分隔目标项的分隔符|
+|dispatcherItems|转发目标项|无|转发列表为一到多个使用英文逗号分隔的项，目标可以是磁盘文件或流程实例|
+|targetFileMaxSize|文件尺寸|2GB|转存目标文件最大尺寸，超过该尺寸，文件名按数字递增滚动|
 ##### 备注：  
 dispatcherItems参数值的格式为:  [targetType01:]item01,[targetType02:]item02...  
 其中targetType是可选的，缺省值为：buffer，可选targetType值有：file、buffer、channel
