@@ -1,7 +1,6 @@
 package com.df.plugin.sink.redis.service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
@@ -49,9 +48,7 @@ public class RedisService {
 			if(RedisType.dict==redisMapper.targetType) {
 				isSuc=sendMapMsg(redisMapper.target,(HashMap<String,Object>)redisMapper.message);
 			}else{
-				String target=redisMapper.target;
-				ArrayList<Object> msgList=(ArrayList<Object>)redisMapper.message;
-				isSuc=sendRecord(target, msgList.toArray(new Object[msgList.size()]));
+				isSuc=sendRecord(redisMapper.target, (Object[])redisMapper.message);
 			}
 			
 			if(!isSuc) return false;
@@ -86,6 +83,15 @@ public class RedisService {
 		if(null==messageMap || messageMap.isEmpty()) {
 			log.error("dict message: {} transfer to messageMap is null or empty...",message);
 			return true;
+		}
+		
+		for(Entry<String, Object> entry:messageMap.entrySet()) {
+			Object value=entry.getValue();
+			if(null==value) continue;
+			Object json=CommonUtil.toJSON(value);
+			Class<?> jsonType=json.getClass();
+			if(CommonUtil.isSimpleType(jsonType)) continue;
+			messageMap.put(entry.getKey(), CommonUtil.javaToJsonStr(json).trim());
 		}
 		
 		return sendMapMsg(target,messageMap);
@@ -183,27 +189,12 @@ public class RedisService {
 			return true;
 		}
 		
-		ArrayList<Object> msgList=new ArrayList<Object>();
 		String[] messages=redisConfig.fieldSeparatorRegex.split(message);
-		try{
-			for(String msgItem:messages) {
-				if(CommonUtil.isNotJson(msgItem)) {
-					msgList.add(msgItem);
-				}else{
-					msgList.add(CommonUtil.jsonStrToJava(msgItem, Object.class));
-				}
-			}
-		}catch(Exception e) {
-			log.error("pipe messages transfer to messageMap occur exception...",Arrays.toString(messages));
-		}
+		for(int i=0;i<messages.length;messages[i]=messages[i++].trim());
 		
-		if(null==msgList || msgList.isEmpty()) {
-			log.error("pipe messages transfer to messageMap is null or empty...");
-			return true;
-		}
+		if(sendRecord(target, (Object[])messages)) return true;
+		redisConfig.preFailSinkSet.add(new RedisMapper(target,messages,redisConfig.targetType));
 		
-		if(sendRecord(target, msgList.toArray(new Object[msgList.size()]))) return true;
-		redisConfig.preFailSinkSet.add(new RedisMapper(target,msgList,redisConfig.targetType));
 		return false;
 	}
 	

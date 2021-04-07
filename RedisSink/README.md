@@ -28,7 +28,17 @@ unzip  /install/zip/redisSink.zip -d /software/DataFlow-3.0/plugins/
 |maxRetryTimes|重试次数|3|本插件插入数据记录到Redis缓存例程服务失败后的最大重试次数|
 |failMaxTimeMills|失败等待|2000|插入失败后，本插件前后两次重试之间等待的最大时间间隔(单位:毫秒)|
 ##### 备注：  
-hostList参数值可以有多项，项与项之间使用英文逗号分隔即可；鉴于目前系统框架集成的是Netty5，Lettuce需要Netty4.X的支持，而Netty5又不能向前兼容到Netty4版本，故RedisTemplate底层通信组件选用的是JedisCluster，相较于Lettuce而言，JedisCluster不支持异步事件和哨兵集群，故使用本插件时不要将其对接到哨兵集群的例程上；本插件关于上游通道的输入格式举例如下：  
+hostList参数值可以有多项，项与项之间使用英文逗号分隔即可；鉴于目前系统框架集成的是Netty5，Lettuce需要Netty4.X的支持，而Netty5又不能向前兼容到Netty4版本，故RedisTemplate底层通信组件选用的是JedisCluster，相较于Lettuce而言，JedisCluster不支持异步事件和哨兵集群，故使用本插件时不要将其对接到哨兵集群的例程上。另外，本插件将所有对象统一序列化为字符串类型后推送到Redis例程服务，从Redis例程服务取出的数据中，字串类型值都带有额外的双引号，同时键及字串类型值都有反斜杠转义，如果我们需要将其反序列化为对象类型，应该先去其额外引号和反斜杠，操作如下：  
+```JAVA
+//来自Redis例程服务返回的值
+String valueFromRedis="{\"uid\":100,\"uname\":\"ligang\",\"weight\":126.55,\"uage\":38}";
+ObjectMapper mapper=new ObjectMapper();
+//连续两次调用readValue即可将其对象反序列化为字典对象类型
+Object transferValue=mapper.readValue(mapper.readValue(valueFromRedis, String.class), Object.class);
+//输出java.util.LinkedHashMap
+System.out.println(transferValue.getClass().getName());
+```
+本插件关于上游通道的输入格式举例如下：  
 ```Text
 1、推送到管道
 1.1、parse=true输入格式举例:
