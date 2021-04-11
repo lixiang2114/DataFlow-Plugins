@@ -1,4 +1,4 @@
-package com.df.plugin.sink.amqp.config;
+package com.df.plugin.transfer.amqp.config;
 
 import java.io.File;
 import java.lang.reflect.Array;
@@ -8,16 +8,17 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Properties;
-import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Binding;
 
-import com.df.plugin.sink.amqp.dto.Route;
-import com.df.plugin.sink.amqp.util.AmqpUtil;
+import com.df.plugin.transfer.amqp.dto.Route;
+import com.df.plugin.transfer.amqp.util.AmqpUtil;
 import com.github.lixiang2114.flow.comps.Flow;
+import com.github.lixiang2114.flow.context.SizeUnit;
 import com.github.lixiang2114.flow.util.CommonUtil;
 import com.github.lixiang2114.flow.util.PropertiesReader;
 
@@ -28,9 +29,9 @@ import com.github.lixiang2114.flow.util.PropertiesReader;
 @SuppressWarnings("unchecked")
 public class AmqpConfig {
 	/**
-	 * 发送器运行时路径
+	 * 流程实例
 	 */
-	public File sinkPath;
+	public Flow flow;
 	
 	/**
 	 * AMQP例程虚拟主机
@@ -38,24 +39,29 @@ public class AmqpConfig {
 	public String virHost;
 	
 	/**
-	 * 是否解析通道数据记录
+	 * 插件运行时路径
 	 */
-	public boolean parse;
+	public File pluginPath;
 	
 	/**
-	 * AMQP服务器登录密码
+	 * AMQP服务器密码
 	 */
 	public String passWord;
 	
 	/**
-	 * AMQP服务器登录用户
+	 * AMQP服务器用户
 	 */
 	public String userName;
 	
 	/**
-	 * AMQP客户端配置
+	 * 转存目录
 	 */
-	public Properties config;
+	public File transferPath;
+	
+	/**
+	 * Redis客户端配置
+	 */
+	private Properties config;
 	
 	/**
 	 * AMQP客户端操作工具
@@ -63,55 +69,24 @@ public class AmqpConfig {
 	public AmqpUtil amqpUtil;
 	
 	/**
-	 * 目标交换器索引
+	 * 实时转存的日志文件
 	 */
-	public int exchangeIndex;
+	public File transferSaveFile;
 	
 	/**
-	 * 目标路由键索引
+	 * 拉取超时时间(单位:毫秒)
 	 */
-	public int routingKeyIndex;
+	public Long pollTimeoutMills;
 	
 	/**
-	 * 记录字段默认分隔符正则式
-	 * 默认为英文逗号
+	 * 扫描的目标队列
 	 */
-	public Pattern fieldSeparator;
+	public String[] targetQueues;
 	
 	/**
-	 * 目标交换器字段
+	 * 转存日志文件最大尺寸
 	 */
-	public String exchangeField;
-	
-	/**
-	 * 目标路由键字段
-	 */
-	public String routingKeyField;
-	
-	/**
-	 * 默认交换器
-	 */
-	public String defaultExchange;
-	
-	/**
-	 * 默认路由键
-	 */
-	public String defaultRoutingKey;
-	
-	/**
-	 * 发送失败后最大等待时间间隔
-	 */
-	public Long failMaxWaitMills;
-	
-	/**
-	 * 发送失败后最大重试次数
-	 */
-	public Integer maxRetryTimes;
-	
-	/**
-	 * 上次发送失败任务表
-	 */
-	public Set<Object> preFailSinkSet;
+	public Long transferSaveMaxSize;
 	
 	/**
 	 * 当本插件退出时删除路由拓扑
@@ -148,7 +123,7 @@ public class AmqpConfig {
 	/**
      * 数字正则式
      */
-	private static final Pattern NUMBER_REGEX=Pattern.compile("^[0-9]+$");
+	public static final Pattern NUMBER_REGEX=Pattern.compile("^[0-9]+$");
 	
 	/**
 	 * 日志工具
@@ -158,7 +133,12 @@ public class AmqpConfig {
 	/**
      * IP地址正则式
      */
-	private static final Pattern IP_REGEX=Pattern.compile("^\\d+\\.\\d+\\.\\d+\\.\\d+$");
+	public static final Pattern IP_REGEX=Pattern.compile("^\\d+\\.\\d+\\.\\d+\\.\\d+$");
+	
+	/**
+	 * 容量正则式
+	 */
+	private static final Pattern CAP_REGEX = Pattern.compile("([1-9]{1}\\d+)([a-zA-Z]{1,5})");
 	
 	/**
 	 * 源组件类型
@@ -172,22 +152,50 @@ public class AmqpConfig {
 	
 	public AmqpConfig(){}
 	
-	public AmqpConfig(Flow flow) {
-		this.sinkPath=flow.sinkPath;
-		this.preFailSinkSet=flow.preFailSinkSet;
-		this.config=PropertiesReader.getProperties(new File(sinkPath,"sink.properties"));
+	public AmqpConfig(Flow flow){
+		this.flow=flow;
+		this.transferPath=flow.sharePath;
+		this.pluginPath=flow.transferPath;
+		this.config=PropertiesReader.getProperties(new File(pluginPath,"transfer.properties"));
 	}
 	
 	/**
-	 * AMQP配置
 	 * @param config
 	 */
 	public AmqpConfig config() {
-		//静态初始化Redis模板工具
+		String transferSaveFileName=config.getProperty("transferSaveFile","").trim();
+		if(transferSaveFileName.isEmpty()) {
+			transferSaveFile=new File(transferPath,"buffer.log.0");
+			log.warn("not found parameter: 'transferSaveFile',will be use default...");
+		}else{
+			File file=new File(transferSaveFileName);
+			if(!file.exists() || file.isFile()) transferSaveFile=file;
+		}
+		
+		if(null==transferSaveFile) {
+			log.error("transferSaveFile can not be NULL...");
+			throw new RuntimeException("transferSaveFile can not be NULL...");
+		}
+		
+		log.info("transfer save file is: "+transferSaveFile.getAbsolutePath());
+		
+		transferSaveMaxSize=getTransferSaveMaxSize();
+		log.info("transfer save file max size is: "+transferSaveMaxSize);
+		
 		initHostAddress();
+		
 		if(hostList.isEmpty()) {
 			log.error("hostList parameter must be specify...");
 			throw new RuntimeException("hostList parameter must be specify...");
+		}
+		
+		String targetQueueStr=config.getProperty("targetQueues","").trim();
+		if(targetQueueStr.isEmpty()) {
+			log.error("targetQueues parameter must be specify...");
+			throw new RuntimeException("targetQueues parameter must be specify...");
+		}else{
+			this.targetQueues=COMMA_REGEX.split(targetQueueStr);
+			for(int i=0;i<targetQueues.length;targetQueues[i]=targetQueues[i++].trim());
 		}
 		
 		String virHostStr=config.getProperty("virHost","").trim();
@@ -199,48 +207,14 @@ public class AmqpConfig {
 		String userNameStr=config.getProperty("userName","").trim();
 		this.userName=userNameStr.isEmpty()?null:userNameStr;
 		
-		this.amqpUtil=new AmqpUtil(CommonUtil.joinToString(hostList, ","),virHost,userName,passWord);
-		
 		String delRoutingOnExitStr=config.getProperty("delRoutingOnExit","").trim();
 		this.delRoutingOnExit=delRoutingOnExitStr.isEmpty()?false:Boolean.parseBoolean(delRoutingOnExitStr);
 		
-		//运行时参数初始化
-		String parseStr=config.getProperty("parse","").trim();
-		this.parse=parseStr.isEmpty()?true:Boolean.parseBoolean(parseStr);
+		String pollTimeoutMillStr=config.getProperty("pollTimeoutMills","").trim();
+		this.pollTimeoutMills=pollTimeoutMillStr.isEmpty()?100:Long.parseLong(pollTimeoutMillStr);
 		
-		String fieldSeparatorStr=config.getProperty("fieldSeparator","").trim();
-		this.fieldSeparator=Pattern.compile(fieldSeparatorStr.isEmpty()?"#":fieldSeparatorStr);
+		this.amqpUtil=new AmqpUtil(CommonUtil.joinToString(hostList, ","),virHost,userName,passWord);
 		
-		String maxRetryTimeStr=config.getProperty("maxRetryTimes","").trim();
-		this.maxRetryTimes=maxRetryTimeStr.isEmpty()?3:Integer.parseInt(maxRetryTimeStr);
-		
-		String exchangeFieldStr=config.getProperty("exchangeField","").trim();
-		this.exchangeField=exchangeFieldStr.isEmpty()?"exchangeName":exchangeFieldStr;
-		
-		String exchangeIndexStr=config.getProperty("exchangeIndex","").trim();
-		this.exchangeIndex=exchangeIndexStr.isEmpty()?0:Integer.parseInt(exchangeIndexStr);
-		
-		String routingKeyFieldStr=config.getProperty("routingKeyField","").trim();
-		this.routingKeyField=routingKeyFieldStr.isEmpty()?"routingKeyName":routingKeyFieldStr;
-		
-		String routingKeyIndexStr=config.getProperty("routingKeyIndex","").trim();
-		this.routingKeyIndex=routingKeyIndexStr.isEmpty()?1:Integer.parseInt(routingKeyIndexStr);
-		
-		String failMaxTimeMillStr=config.getProperty("failMaxTimeMills","").trim();
-		this.failMaxWaitMills=failMaxTimeMillStr.isEmpty()?2000:Long.parseLong(failMaxTimeMillStr);
-		
-		String defaultExchangeStr=config.getProperty("defaultExchange","").trim();
-		this.defaultExchange=defaultExchangeStr.isEmpty()?"defaultExchange":defaultExchangeStr;
-		
-		String defaultRoutingKeyStr=config.getProperty("defaultRoutingKey","").trim();
-		this.defaultRoutingKey=defaultRoutingKeyStr.isEmpty()?"defaultRoutingKey":defaultRoutingKeyStr;
-		
-		if(exchangeIndex<0 || routingKeyIndex<0 || exchangeIndex==routingKeyIndex) {
-			log.error("exchangeIndex or routingKeyIndex must be greater than 0 and can not be equals...");
-			throw new RuntimeException("exchangeIndex or routingKeyIndex must be greater than 0 and can not be equals...");
-		}
-		
-		//路由拓扑架构初始化
 		log.info("build routing topology architecture...");
 		buildRoutingTopology();
 		
@@ -336,6 +310,17 @@ public class AmqpConfig {
 	}
 	
 	/**
+	 * 获取转存日志文件最大尺寸(默认为2GB)
+	 */
+	private Long getTransferSaveMaxSize(){
+		String configMaxVal=config.getProperty("transferSaveMaxSize","").trim();
+		if(configMaxVal.isEmpty()) return 2*1024*1024*1024L;
+		Matcher matcher=CAP_REGEX.matcher(configMaxVal);
+		if(!matcher.find()) return 2*1024*1024*1024L;
+		return SizeUnit.getBytes(Long.parseLong(matcher.group(1)), matcher.group(2).substring(0,1));
+	}
+	
+	/**
 	 * 获取字段值
 	 * @param key 键
 	 * @return 返回字段值
@@ -406,24 +391,18 @@ public class AmqpConfig {
 	 */
 	public String collectRealtimeParams() {
 		HashMap<String,Object> map=new HashMap<String,Object>();
-		map.put("parse", parse);
 		map.put("virHost", virHost);
 		map.put("hostList", hostList);
-		map.put("sinkPath", sinkPath);
 		map.put("routeList", routeList);
 		map.put("passWord", passWord);
 		map.put("userName", userName);
-		map.put("fieldSeparator", fieldSeparator);
-		map.put("exchangeField", exchangeField);
-		map.put("exchangeIndex", exchangeIndex);
-		map.put("maxRetryTimes", maxRetryTimes);
-		map.put("routingKeyField", routingKeyField);
-		map.put("failMaxWaitMills", failMaxWaitMills);
-		map.put("routingKeyIndex", routingKeyIndex);
-		map.put("defaultExchange", defaultExchange);
+		map.put("pluginPath", pluginPath);
+		map.put("transferPath", transferPath);
+		map.put("transferSaveFile", transferSaveFile);
+		map.put("pollTimeoutMills", pollTimeoutMills);
 		map.put("delRoutingOnExit", delRoutingOnExit);
-		map.put("defaultRoutingKey", defaultRoutingKey);
-		map.put("preFailSinkSetSize", preFailSinkSet.size());
+		map.put("transferSaveMaxSize", transferSaveMaxSize);
+		map.put("targetQueues", Arrays.toString(targetQueues));
 		return map.toString();
 	}
 }
