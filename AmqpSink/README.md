@@ -41,7 +41,7 @@ queue1:queue;exchange1:direct;routKey1,exchange3:direct;exchange2:fanout,queue2:
 #推送到默认复合索引
 echo "hello1 world..."
 #推送到exchange1交换器，该交换器根据routingKey1路由到下一个组件
-echo exchange1#routingKey1#hello1 world...>>my2.log
+echo exchange1#routingKey1#hello1 world...
 
 2、parse=false输入格式举例:
 #推送到默认复合索引
