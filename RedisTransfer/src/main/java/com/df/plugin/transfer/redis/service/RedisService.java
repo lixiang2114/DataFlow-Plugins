@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import com.df.plugin.transfer.redis.config.RedisConfig;
 import com.df.plugin.transfer.redis.util.RedisUtil;
+import com.github.lixiang2114.flow.util.CommonUtil;
 
 /**
  * @author Lixiang
@@ -22,6 +23,11 @@ public class RedisService {
 	 * Redis配置
 	 */
 	private RedisConfig redisConfig;
+	
+	/**
+	 * Redis客户端工具
+	 */
+	private RedisUtil redisUtil;
 	
 	/**
 	 * 转存缓冲输出器
@@ -37,6 +43,7 @@ public class RedisService {
 	
 	public RedisService(RedisConfig redisConfig) {
 		this.redisConfig=redisConfig;
+		this.redisUtil=redisConfig.redisUtil;
 		try {
 			bufferedWriter=Files.newBufferedWriter(redisConfig.transferSaveFile.toPath(), StandardCharsets.UTF_8, StandardOpenOption.CREATE,StandardOpenOption.APPEND);
 		} catch (IOException e) {
@@ -53,11 +60,11 @@ public class RedisService {
 			for(String targetPipe:redisConfig.targetPipes) {
 				if(targetPipe.isEmpty()) continue;
 				
-				String object=RedisUtil.rightPop(targetPipe, redisConfig.pollTimeoutMills,String.class);
+				Object object=redisUtil.rightPop(targetPipe, redisConfig.pollTimeoutMills);
 				if(null==object) continue;
 				
-				String line=object.toString().trim();
-				if(line.isEmpty()) continue;
+				String line=CommonUtil.toString(object);
+				if(null==line || line.isEmpty()) continue;
 	        	
 	        	//写入转存日志文件
 	        	bufferedWriter.write(line);

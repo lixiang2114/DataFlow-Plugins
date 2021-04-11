@@ -82,22 +82,22 @@ public class RedisUtil {
 	/**
 	 * 列表操作工具
 	 */
-	private static ListOperations<String, Object> listOperations;
+	private ListOperations<String, Object> listOperations;
 	
 	/**
 	 * Redis缓存通用操作工具
 	 */
-	private static RedisTemplate<String,Object> redisTemplate;
+	private RedisTemplate<String,Object> redisTemplate;
 	
 	/**
 	 * 集合操作工具
 	 */
-	private static SetOperations<String, Object> setOperations;
+	private SetOperations<String, Object> setOperations;
 	
 	/**
 	 * 有序集合操作工具
 	 */
-	private static ZSetOperations<String, Object> zsetOperations;
+	private ZSetOperations<String, Object> zsetOperations;
 	
 	/**
      * 队列最大阻塞超时时间
@@ -107,17 +107,17 @@ public class RedisUtil {
 	/**
 	 * 字串操作工具
 	 */
-	private static ValueOperations<String, Object> valueOperations;
+	private ValueOperations<String, Object> valueOperations;
 	
 	/**
 	 * 集群操作
 	 */
-	private static ClusterOperations<String,Object> clusterOperations;
+	private ClusterOperations<String,Object> clusterOperations;
 	
 	/**
 	 * Hash表操作工具
 	 */
-	private static HashOperations<String, String, Object> hashOperations;
+	private HashOperations<String, String, Object> hashOperations;
 	
 	/**
      * 缓存Redis脚本函数
@@ -145,27 +145,33 @@ public class RedisUtil {
         hkeysBuilder.append("end;end;return resultDict");
         HKEYS_LUA=hkeysBuilder.toString();
     }
+    
+    public RedisUtil() {}
+    
+    public RedisUtil(RedisTemplate redisTemplate) {
+    	setRedisTemplate(redisTemplate);
+    }
 	
 	/**
 	 * 获取Spring-RedisTemplate
 	 */
-	public static final RedisTemplate getRedisTemplate() {
-		return null==RedisUtil.redisTemplate?RedisUtil.redisTemplate=ApplicationUtil.getBean("redisTemplate",RedisTemplate.class):RedisUtil.redisTemplate;
+	public RedisTemplate getRedisTemplate() {
+		return null==redisTemplate?redisTemplate=ApplicationUtil.getBean("redisTemplate",RedisTemplate.class):redisTemplate;
 	}
 	
 	/**
 	 * 初始化Spring-RedisTemplate
 	 * @param redisTemplate
 	 */
-	public static final void setRedisTemplate(RedisTemplate redisTemplate) {
+	public void setRedisTemplate(RedisTemplate redisTemplate) {
 		if(null==redisTemplate) return;
-		RedisUtil.redisTemplate=redisTemplate;
-		clusterOperations=redisTemplate.opsForCluster();
-		hashOperations=redisTemplate.opsForHash();
-		valueOperations=redisTemplate.opsForValue();
-		listOperations=redisTemplate.opsForList();
-		setOperations=redisTemplate.opsForSet();
-		zsetOperations=redisTemplate.opsForZSet();
+		this.redisTemplate=redisTemplate;
+		this.clusterOperations=redisTemplate.opsForCluster();
+		this.hashOperations=redisTemplate.opsForHash();
+		this.valueOperations=redisTemplate.opsForValue();
+		this.listOperations=redisTemplate.opsForList();
+		this.setOperations=redisTemplate.opsForSet();
+		this.zsetOperations=redisTemplate.opsForZSet();
 	}
 	
 	/**
@@ -176,7 +182,7 @@ public class RedisUtil {
 	 * 匹配结尾的前缀:*ini、*.png
 	 * 匹配开头的前缀:userScore*、userScore.*
 	 */
-	public static Set<String> keys(String pattern) {
+	public Set<String> keys(String pattern) {
 		return redisTemplate.keys(pattern);
 	}
 	
@@ -187,7 +193,7 @@ public class RedisUtil {
 	 * @description pattern参数解释:
 	 * 只要键串中包含参数串pattern就匹配成功
 	 */
-	public static Set<String> hkeys(String key,String pattern) {
+	public Set<String> hkeys(String key,String pattern) {
 		List<byte[]> result=null;
 		String functionName=funToScriptDict.get("HKEYS_LUA");
 		if(null!=functionName){
@@ -214,7 +220,7 @@ public class RedisUtil {
      * @param key 键
      * @return 是否存在指定的键
      */
-    public static boolean hasKey(String key) {
+    public boolean hasKey(String key) {
         return redisTemplate.hasKey(key);
     }
     
@@ -224,7 +230,7 @@ public class RedisUtil {
      * @param field 域
      * @return 是否存在指定的域
      */
-    public static boolean hasField(String key,String field) {
+    public boolean hasField(String key,String field) {
         return hashOperations.hasKey(key, field);
     }
     
@@ -234,7 +240,7 @@ public class RedisUtil {
      * @param expire 过期时间(单位:天数)
      * @return 是否存在指定的键
      */
-    public static long expireInDays(String key, Integer expire) {
+    public long expireInDays(String key, Integer expire) {
     	return expire(key, expire.longValue(), TimeUnit.DAYS);
     }
     
@@ -244,7 +250,7 @@ public class RedisUtil {
      * @param expire 过期时间(单位:小时)
      * @return 是否存在指定的键
      */
-    public static long expireInHours(String key, Long expire) {
+    public long expireInHours(String key, Long expire) {
     	return expire(key, expire, TimeUnit.HOURS);
     }
     
@@ -254,7 +260,7 @@ public class RedisUtil {
      * @param expire 过期时间(单位:分钟)
      * @return 是否存在指定的键
      */
-    public static long expireInMinus(String key, Long expire) {
+    public long expireInMinus(String key, Long expire) {
     	return expire(key, expire, TimeUnit.MINUTES);
     }
     
@@ -264,7 +270,7 @@ public class RedisUtil {
      * @param expire 过期时间(单位:秒)
      * @return 是否存在指定的键
      */
-    public static long expireInSecs(String key, Long expire) {
+    public long expireInSecs(String key, Long expire) {
     	return expire(key, expire, TimeUnit.SECONDS);
     }
     
@@ -274,7 +280,7 @@ public class RedisUtil {
      * @param expire 过期时间(单位:毫秒)
      * @return 是否存在指定的键
      */
-    public static long expireInMills(String key, Long expire) {
+    public long expireInMills(String key, Long expire) {
     	return expire(key, expire, TimeUnit.MILLISECONDS);
     }
     
@@ -285,7 +291,7 @@ public class RedisUtil {
      * @param unit 过期时间单位
      * @return 是否存在指定的键
      */
-    public static long expire(String key, Long expire,TimeUnit unit) {
+    public long expire(String key, Long expire,TimeUnit unit) {
         redisTemplate.expire(key, expire, unit);
         if(redisTemplate.hasKey(key)) return 1L;
         return 0L;
@@ -297,7 +303,7 @@ public class RedisUtil {
      * @param increment 增长量(可以为负值)
      * @return Value增长后的值
      */
-    public static long incrBy(String key, Long increment) {
+    public long incrBy(String key, Long increment) {
 		return valueOperations.increment(key, increment);
 	}
 	
@@ -306,7 +312,7 @@ public class RedisUtil {
 	 * @param key 键
 	 * @param value 值
 	 */
-	public static void set(String key,Object value){
+	public void set(String key,Object value){
 		valueOperations.set(key, value);
 	}
 	
@@ -316,7 +322,7 @@ public class RedisUtil {
 	 * @param value 值
 	 * @param expired 过期时间毫秒数
 	 */
-	public static void set(String key,Object value,Long expired){
+	public void set(String key,Object value,Long expired){
 		valueOperations.set(key, value, Duration.ofMillis(expired));
 	}
 	
@@ -325,7 +331,7 @@ public class RedisUtil {
 	 * @param key 键
 	 * @return 对象
 	 */
-	public static Object get(String key){
+	public Object get(String key){
 		return valueOperations.get(key);
 	}
 	
@@ -335,7 +341,7 @@ public class RedisUtil {
 	 * @param expire 过期时间毫秒数
 	 * @return 对象
 	 */
-	public static Object get(String key,Integer expire){
+	public Object get(String key,Integer expire){
 		Object value=valueOperations.get(key);
 		expireInMills(key,expire.longValue());
 		return value;
@@ -346,7 +352,7 @@ public class RedisUtil {
 	 * @param key 键
 	 * @return 泛化类型
 	 */
-	public static <R> R get(String key,Class<R> type){
+	public <R> R get(String key,Class<R> type){
 		return type.cast(valueOperations.get(key));
 	}
 	
@@ -356,7 +362,7 @@ public class RedisUtil {
 	 * @param expire 过期时间毫秒数
 	 * @return 泛化类型
 	 */
-	public static <R> R getAndExpire(String key,Class<R> type,Integer expire){
+	public <R> R getAndExpire(String key,Class<R> type,Integer expire){
 		R r=type.cast(valueOperations.get(key));
 		expireInMills(key,expire.longValue());
 		return r;
@@ -367,7 +373,7 @@ public class RedisUtil {
 	 * @param key 键
 	 * @return 是否删除成功
 	 */
-	public static boolean del(String key){
+	public boolean del(String key){
 		return redisTemplate.delete(key);
 	}
 	
@@ -376,7 +382,7 @@ public class RedisUtil {
 	 * @param pattern 键字串表达式
 	 * @return 被删除键的数量
 	 */
-    public static long delAll(String pattern) {
+    public  long delAll(String pattern) {
     	Set<String> keys=redisTemplate.keys(pattern);
     	return redisTemplate.delete(keys);
     }
@@ -386,7 +392,7 @@ public class RedisUtil {
 	 * @param key 标识集合的键
 	 * @return 集合尺寸
 	 */
-    public static long listSize(String key) {
+    public long listSize(String key) {
     	return listOperations.size(key);
     }
     
@@ -395,7 +401,7 @@ public class RedisUtil {
 	 * @param key 键
 	 * @param values 值序列
 	 */
-	public static void leftPush(String key,Object... values){
+	public  void leftPush(String key,Object... values){
 		if(null==values || 0==values.length) return;
 		listOperations.leftPushAll(key, values);
 	}
@@ -406,7 +412,7 @@ public class RedisUtil {
      * @param index 下标
      * @param value 值
      */
-    public static void listSet(String key, Long index,Object value) {
+    public void listSet(String key, Long index,Object value) {
         listOperations.set(key, index, value);
     }
     
@@ -416,7 +422,7 @@ public class RedisUtil {
      * @param index 下标
      * @return 下标处的值
      */
-    public static Object listGet(String key, Long index) {
+    public Object listGet(String key, Long index) {
         return listOperations.index(key, index);
     }
     
@@ -426,7 +432,7 @@ public class RedisUtil {
      * @param index 下标
      * @return 下标处的值
      */
-    public static <R> R listGet(String key, Long index,Class<R> returnType) {
+    public <R> R listGet(String key, Long index,Class<R> returnType) {
     	Object value=listOperations.index(key, index);
         return returnType.cast(value);
     }
@@ -437,7 +443,7 @@ public class RedisUtil {
      * @param value 需要删除的元素值
      * @return 实际删除的数量
      */
-    public static Long listDelAll(String key, Object value) {
+    public Long listDelAll(String key, Object value) {
         return listOperations.remove(key, 0,value);
     }
     
@@ -447,7 +453,7 @@ public class RedisUtil {
      * @param value 需要删除的元素值
      * @return 实际删除的数量
      */
-    public static Long listDelFirst(String key, Object value) {
+    public Long listDelFirst(String key, Object value) {
         return listOperations.remove(key, 1,value);
     }
     
@@ -457,7 +463,7 @@ public class RedisUtil {
      * @param value 需要删除的元素值
      * @return 实际删除的数量
      */
-    public static Long listDelLast(String key, Object value) {
+    public Long listDelLast(String key, Object value) {
         return listOperations.remove(key, -1,value);
     }
     
@@ -468,7 +474,7 @@ public class RedisUtil {
      * @param value 需要删除的元素值
      * @return 实际删除的数量
      */
-    public static Long listDel(String key, Long count,Object value) {
+    public Long listDel(String key, Long count,Object value) {
         return listOperations.remove(key, count,value);
     }
 	
@@ -478,7 +484,7 @@ public class RedisUtil {
 	 * @param key 键
 	 * @return 弹出的对象
 	 */
-	public static Object rightPop(String key){
+	public Object rightPop(String key){
 		return listOperations.rightPop(key);
 	}
 	
@@ -489,7 +495,7 @@ public class RedisUtil {
 	 * @param returnType 返回类型
 	 * @return 泛化类型
 	 */
-	public static <R> R rightPop(String key,Class<R> returnType){
+	public <R> R rightPop(String key,Class<R> returnType){
 		Object value=listOperations.rightPop(key);
 		return returnType.cast(value);
 	}
@@ -501,7 +507,7 @@ public class RedisUtil {
 	 * @param maxWaitMills 最大等待时间(单位:毫秒)
 	 * @return 弹出的对象
 	 */
-	public static Object rightPop(String key,Long maxWaitMills){
+	public Object rightPop(String key,Long maxWaitMills){
 		return listOperations.rightPop(key, maxWaitMills, TimeUnit.MILLISECONDS);
 	}
 	
@@ -513,7 +519,7 @@ public class RedisUtil {
 	 * @param unit 最大等待时间单位
 	 * @return 弹出的对象
 	 */
-	public static Object rightPop(String key,Long maxWait, TimeUnit unit){
+	public Object rightPop(String key,Long maxWait, TimeUnit unit){
 		return listOperations.rightPop(key, maxWait, unit);
 	}
 	
@@ -525,7 +531,7 @@ public class RedisUtil {
 	 * @param returnType 返回类型
 	 * @return 泛化类型
 	 */
-	public static <R> R rightPop(String key,Long maxWaitMills, Class<R> returnType){
+	public <R> R rightPop(String key,Long maxWaitMills, Class<R> returnType){
 		Object value=listOperations.rightPop(key, maxWaitMills, TimeUnit.MILLISECONDS);
 		return returnType.cast(value);
 	}
@@ -539,7 +545,7 @@ public class RedisUtil {
 	 * @param returnType 返回类型
 	 * @return 泛化类型
 	 */
-	public static <R> R rightPop(String key,Long maxWaitMills, TimeUnit unit,Class<R> returnType){
+	public <R> R rightPop(String key,Long maxWaitMills, TimeUnit unit,Class<R> returnType){
 		Object value=listOperations.rightPop(key, maxWaitMills, unit);
 		return returnType.cast(value);
 	}
@@ -551,7 +557,7 @@ public class RedisUtil {
 	 * @param dstKey 目标表键
 	 * @return 弹出的对象
 	 */
-	public static Object rightPopAndLeftPush(String srcKey,String dstKey){
+	public Object rightPopAndLeftPush(String srcKey,String dstKey){
 		return listOperations.rightPopAndLeftPush(srcKey, dstKey);
 	}
 	
@@ -563,7 +569,7 @@ public class RedisUtil {
 	 * @param returnType 返回类型
 	 * @return 泛化类型
 	 */
-	public static <R> R rightPopAndLeftPush(String srcKey,String dstKey,Class<R> returnType){
+	public <R> R rightPopAndLeftPush(String srcKey,String dstKey,Class<R> returnType){
 		Object value=listOperations.rightPopAndLeftPush(srcKey, dstKey);
 		return returnType.cast(value);
 	}
@@ -577,7 +583,7 @@ public class RedisUtil {
 	 * @param unit 最大等待时间单位
 	 * @return 弹出的对象
 	 */
-	public static Object rightPopAndLeftPush(String srcKey,String dstKey,Long maxWaitMills, TimeUnit unit){
+	public Object rightPopAndLeftPush(String srcKey,String dstKey,Long maxWaitMills, TimeUnit unit){
 		return listOperations.rightPopAndLeftPush(srcKey, dstKey, maxWaitMills, unit);
 	}
 	
@@ -591,7 +597,7 @@ public class RedisUtil {
 	 * @param returnType 返回类型
 	 * @return 弹出的对象
 	 */
-	public static <R> R rightPopAndLeftPush(String srcKey,String dstKey,Long maxWaitMills, TimeUnit unit,Class<R> returnType){
+	public <R> R rightPopAndLeftPush(String srcKey,String dstKey,Long maxWaitMills, TimeUnit unit,Class<R> returnType){
 		Object value=listOperations.rightPopAndLeftPush(srcKey, dstKey, maxWaitMills, unit);
 		return returnType.cast(value);
 	}
@@ -601,7 +607,7 @@ public class RedisUtil {
      * @param key 集合标识键
      * @return 集合尺寸
      */
-    public static long setSize(String key, Object value) {
+    public long setSize(String key, Object value) {
         return setOperations.size(key);
     }
 	
@@ -611,7 +617,7 @@ public class RedisUtil {
      * @param value 值
      * @return 被加入到Set集合中的元素数量
      */
-    public static long setAdd(String key, Object... values) {
+    public long setAdd(String key, Object... values) {
         return setOperations.add(key, values);
     }
     
@@ -621,7 +627,7 @@ public class RedisUtil {
      * @param value 值
      * @return 集合中是否存在指定的参数value
      */
-    public static boolean contains(String key, Object value) {
+    public boolean contains(String key, Object value) {
         return setOperations.isMember(key, value);
     }
     
@@ -631,7 +637,7 @@ public class RedisUtil {
      * @param value 值
      * @return 被移除的元素数量
      */
-    public static long setDel(String key, Object... values) {
+    public long setDel(String key, Object... values) {
         return setOperations.remove(key, values);
     }
     
@@ -642,7 +648,7 @@ public class RedisUtil {
      * @param dstkey 键
      * @return 被移除的元素数量
      */
-    public static boolean setDel(String srckey, Object srcvalue,String dstkey) {
+    public boolean setDel(String srckey, Object srcvalue,String dstkey) {
     	return setOperations.move(srckey, srcvalue, dstkey);
     }
     
@@ -651,7 +657,7 @@ public class RedisUtil {
      * @param key 键
      * @return Set集合对象
      */
-    public static Set<Object> setGet(String key) {
+    public Set<Object> setGet(String key) {
         return setOperations.members(key);
     }
     
@@ -661,7 +667,7 @@ public class RedisUtil {
 	 * @param otherKeys 其它键集
 	 * @return 交集
 	 */
-	public static Set<Object> sinter(String key,String... otherKeys){
+	public Set<Object> sinter(String key,String... otherKeys){
 		if(null==otherKeys || 0==otherKeys.length) return null;
 		return setOperations.intersect(key, Arrays.asList(otherKeys));
 	}
@@ -672,7 +678,7 @@ public class RedisUtil {
 	 * @param key 键
 	 * @param otherKeys 其它键集
 	 */
-	public static void sinterStore(String dstKey,String key,String... otherKeys){
+	public void sinterStore(String dstKey,String key,String... otherKeys){
 		if(null==otherKeys || 0==otherKeys.length) return;
 		setOperations.intersectAndStore(key, Arrays.asList(otherKeys), dstKey);
 	}
@@ -683,7 +689,7 @@ public class RedisUtil {
 	 * @param otherKeys 其它键集
 	 * @return 并集
 	 */
-	public static Set<Object> union(String key,String... otherKeys){
+	public Set<Object> union(String key,String... otherKeys){
 		if(null==otherKeys || 0==otherKeys.length) return null;
 		return setOperations.union(key, Arrays.asList(otherKeys));
 	}
@@ -694,7 +700,7 @@ public class RedisUtil {
 	 * @param key 键
 	 * @param otherKeys 其它键集
 	 */
-	public static void unionStore(String dstKey,String key,String... otherKeys){
+	public void unionStore(String dstKey,String key,String... otherKeys){
 		if(null==otherKeys || 0==otherKeys.length) return;
 		setOperations.unionAndStore(key, Arrays.asList(otherKeys), dstKey);
 	}
@@ -705,7 +711,7 @@ public class RedisUtil {
 	 * @param otherKeys 其它键集
 	 * @return 差集
 	 */
-	public static Set<Object> diff(String key,String... otherKeys){
+	public Set<Object> diff(String key,String... otherKeys){
 		if(null==otherKeys || 0==otherKeys.length) return null;
 		return setOperations.difference(key, Arrays.asList(otherKeys));
 	}
@@ -716,7 +722,7 @@ public class RedisUtil {
 	 * @param key 键
 	 * @param otherKeys 其它键集
 	 */
-	public static void diffStore(String dstKey,String key,String... otherKeys){
+	public void diffStore(String dstKey,String key,String... otherKeys){
 		if(null==otherKeys || 0==otherKeys.length) return;
 		setOperations.differenceAndStore(key, Arrays.asList(otherKeys), dstKey);
 	}
@@ -726,7 +732,7 @@ public class RedisUtil {
 	 * @param key 键
 	 * @return 有序集合尺寸
 	 */
-	public static long zsetSize(String key){
+	public long zsetSize(String key){
 		return zsetOperations.size(key);
 	}
 	
@@ -737,7 +743,7 @@ public class RedisUtil {
 	 * @param value 值
 	 * @param score 分数
 	 */
-	public static boolean zsetAdd(String key,Object value,Double score){
+	public boolean zsetAdd(String key,Object value,Double score){
 		return zsetOperations.add(key, value, score);
 	}
 	
@@ -748,7 +754,7 @@ public class RedisUtil {
 	 * @param valueDict 元素字典
 	 * @return 添加成功的元素数量
 	 */
-	public static long zsetAdd(String key,Set<TypedTuple<Object>> valueSet){
+	public long zsetAdd(String key,Set<TypedTuple<Object>> valueSet){
 		return zsetOperations.add(key, valueSet);
 	}
 	
@@ -759,7 +765,7 @@ public class RedisUtil {
 	 * @param valueDict 元素字典
 	 * @return 添加成功的元素数量
 	 */
-	public static long zsetAdd(String key,Map<Object,Double> valueDict){
+	public long zsetAdd(String key,Map<Object,Double> valueDict){
 		Set<TypedTuple<Object>> entrySet=new HashSet<TypedTuple<Object>>();
 		for(Map.Entry<Object, Double> entry:valueDict.entrySet()){
 			entrySet.add(new DefaultTypedTuple<Object>(entry.getKey(),entry.getValue()));
@@ -773,7 +779,7 @@ public class RedisUtil {
 	 * @param values 元素值
 	 * @param 移除成功的元素数量
 	 */
-	public static long zsetDel(String key,Object... values){
+	public long zsetDel(String key,Object... values){
 		return zsetOperations.remove(key, values);
 	}
 	
@@ -784,7 +790,7 @@ public class RedisUtil {
 	 * @param end 结束索引
 	 * @return 移除成功的元素数量
 	 */
-	public static long zsetDel(String key,Long start,Long end){
+	public long zsetDel(String key,Long start,Long end){
 		return zsetOperations.removeRange(key, start,end);
 	}
 	
@@ -794,7 +800,7 @@ public class RedisUtil {
 	 * @param value 元素值
 	 * @param 元素值的排名(索引)
 	 */
-	public static long zsetGetIndex(String key,Object value){
+	public long zsetGetIndex(String key,Object value){
 		return zsetOperations.rank(key, value);
 	}
 	
@@ -804,7 +810,7 @@ public class RedisUtil {
 	 * @param value 元素值
 	 * @param 元素值的分数
 	 */
-	public static double zsetGetScore(String key,Object value){
+	public double zsetGetScore(String key,Object value){
 		return zsetOperations.score(key, value);
 	}
 	
@@ -815,7 +821,7 @@ public class RedisUtil {
 	 * @param max 最大分数
 	 * @param score区间中的元素数量
 	 */
-	public static long zsetGetCount(String key,Double min,Double max){
+	public long zsetGetCount(String key,Double min,Double max){
 		return zsetOperations.count(key, min,max);
 	}
 	
@@ -826,7 +832,7 @@ public class RedisUtil {
 	 * @param end 结束索引
 	 * @return 元素值集合
 	 */
-	public static Set<Object> zsetGet(String key,Long start,Long end){
+	public Set<Object> zsetGet(String key,Long start,Long end){
 		return zsetOperations.range(key, start,end);
 	}
 	
@@ -835,7 +841,7 @@ public class RedisUtil {
 	 * @param key 键
 	 * @param 散列表尺寸
 	 */
-	public static long hashSize(String key){
+	public long hashSize(String key){
 		return hashOperations.size(key);
 	}
 	
@@ -845,7 +851,7 @@ public class RedisUtil {
 	 * @param field 域
 	 * @param value 值
 	 */
-	public static void hashSet(String key,String field,Object value){
+	public void hashSet(String key,String field,Object value){
 		hashOperations.put(key, field, value);
 	}
 	
@@ -854,7 +860,7 @@ public class RedisUtil {
 	 * @param key 键
 	 * @param valueMap 字典
 	 */
-	public static void hashSet(String key,Map<String,Object> valueMap){
+	public void hashSet(String key,Map<String,Object> valueMap){
 		hashOperations.putAll(key, valueMap);
 	}
 	
@@ -865,7 +871,7 @@ public class RedisUtil {
 	 * @return 对象类型
 	 * @return 对象
 	 */
-	public static Object hashGet(String key,String field){
+	public Object hashGet(String key,String field){
 		return hashGet(key,field,Object.class);
 	}
 	
@@ -876,7 +882,7 @@ public class RedisUtil {
 	 * @param type 类型
 	 * @return 泛化类型
 	 */
-	public static <R> R hashGet(String key,String field,Class<R> type){
+	public <R> R hashGet(String key,String field,Class<R> type){
 		return type.cast(hashOperations.get(key, field));
 	}
 	
@@ -886,7 +892,7 @@ public class RedisUtil {
 	 * @return hash表
 	 * @return 哈希表
 	 */
-	public static Map<String,Object> hashGet(String key){
+	public Map<String,Object> hashGet(String key){
 		return hashOperations.entries(key);
 	}
 	
@@ -896,7 +902,7 @@ public class RedisUtil {
 	 * @return 值列表
 	 * @return 哈希表中的值集
 	 */
-	public static List<Object> hashValues(String key){
+	public List<Object> hashValues(String key){
 		return hashOperations.values(key);
 	}
 	
@@ -905,7 +911,7 @@ public class RedisUtil {
 	 * @param key 键
 	 * @return 哈希表中的域集
 	 */
-	public static Set<String> hashKeys(String key){
+	public Set<String> hashKeys(String key){
 		return hashOperations.keys(key);
 	}
 	
@@ -914,7 +920,7 @@ public class RedisUtil {
 	 * @param key 键
 	 * @param fields 域列表
 	 */
-	public static void hashDelete(String key,Object... fields){
+	public void hashDelete(String key,Object... fields){
 		hashOperations.delete(key, fields);
 	}
 	
@@ -923,7 +929,7 @@ public class RedisUtil {
 	 * @param host 节点主机名称(或IP地址)
 	 * @param port 节点连接端口
 	 */
-	public static void clearDB(String host,Integer port){
+	public void clearDB(String host,Integer port){
 		RedisClusterNode node=RedisClusterNode.newRedisClusterNode().listeningAt(host, port).build();
 		clusterOperations.flushDb(node);
 	}
@@ -933,7 +939,7 @@ public class RedisUtil {
 	 * @return 集群中的所有主节点
 	 * @description 单节点连接返回NULL
 	 */
-	public static Set<RedisClusterNode> getMasters(){
+	public Set<RedisClusterNode> getMasters(){
 		RedisClusterConnection connection=getRedisClusterConnection();
 		if(null==connection) return null;
 		return connection.clusterGetMasterSlaveMap().keySet();
@@ -946,7 +952,7 @@ public class RedisUtil {
 	 * @return 参数主节点对应的所有副本节点
 	 * @description 单节点连接返回NULL
 	 */
-	public static Collection<RedisClusterNode> getSlaves(String host,Integer port){
+	public Collection<RedisClusterNode> getSlaves(String host,Integer port){
 		RedisClusterConnection connection=getRedisClusterConnection();
 		if(null==connection) return null;
 		RedisClusterNode node=RedisClusterNode.newRedisClusterNode().listeningAt(host, port).build();
@@ -958,7 +964,7 @@ public class RedisUtil {
 	 * @return 集群中所有节点(包括所有主节点和所有从节点)
 	 * @description 单节点连接返回NULL
 	 */
-	public static Iterable<RedisClusterNode> getAllNodes(){
+	public Iterable<RedisClusterNode> getAllNodes(){
 		RedisClusterConnection connection=getRedisClusterConnection();
 		if(null==connection) return null;
 		return connection.clusterGetNodes();
@@ -970,7 +976,7 @@ public class RedisUtil {
 	 * @return 集群节点
 	 * @description 单节点连接返回NULL
 	 */
-	public static RedisClusterNode getNode(Integer slot){
+	public RedisClusterNode getNode(Integer slot){
 		RedisClusterConnection connection=getRedisClusterConnection();
 		if(null==connection) return null;
 		return connection.clusterGetNodeForSlot(slot);
@@ -982,7 +988,7 @@ public class RedisUtil {
 	 * @return 集群节点
 	 * @description 单节点连接返回NULL
 	 */
-	public static RedisClusterNode getNode(String key){
+	public RedisClusterNode getNode(String key){
 		RedisClusterConnection connection=getRedisClusterConnection();
 		if(null==connection) return null;
 		return connection.clusterGetNodeForKey(key.getBytes());
@@ -995,7 +1001,7 @@ public class RedisUtil {
 	 * @return 集群节点
 	 * @description 单节点连接返回NULL
 	 */
-	public static RedisClusterNode getNode(String key,String charset){
+	public RedisClusterNode getNode(String key,String charset){
 		RedisClusterConnection connection=getRedisClusterConnection();
 		if(null==connection) return null;
 		try {
@@ -1012,7 +1018,7 @@ public class RedisUtil {
 	 * @return 键槽
 	 * @description 单节点连接返回NULL
 	 */
-	public static Integer getSlot(String key){
+	public Integer getSlot(String key){
 		RedisClusterConnection connection=getRedisClusterConnection();
 		if(null==connection) return null;
 		return connection.clusterGetSlotForKey(key.getBytes());
@@ -1025,7 +1031,7 @@ public class RedisUtil {
 	 * @return 键槽
 	 * @description 单节点连接返回NULL
 	 */
-	public static Integer getSlot(String key,String charset){
+	public Integer getSlot(String key,String charset){
 		RedisClusterConnection connection=getRedisClusterConnection();
 		if(null==connection) return null;
 		try {
@@ -1043,7 +1049,7 @@ public class RedisUtil {
 	 * @param pattern 查找的键串格式
 	 * @return 键集
 	 */
-	public static Set<String> keys(String host,Integer port,String pattern){
+	public Set<String> keys(String host,Integer port,String pattern){
 		RedisClusterNode node=RedisClusterNode.newRedisClusterNode().listeningAt(host, port).build();
 		return clusterOperations.keys(node, pattern);
 	}
@@ -1053,7 +1059,7 @@ public class RedisUtil {
 	 * @return Redis集群连接
 	 * @description 如果是单点连接则返回NULL
 	 */
-	public static RedisClusterConnection getRedisClusterConnection(){
+	public RedisClusterConnection getRedisClusterConnection(){
 		RedisConnection connection=connection();
 		if(RedisClusterConnection.class.isInstance(connection)) return (RedisClusterConnection)connection;
 		return null;
@@ -1064,7 +1070,7 @@ public class RedisUtil {
 	 * @return Redis单点连接
 	 * @description 如果是集群连接则返回NULL
 	 */
-	public static StringRedisConnection getSingleConnection(){
+	public StringRedisConnection getSingleConnection(){
 		RedisConnection connection=connection();
 		if(StringRedisConnection.class.isInstance(connection)) return (StringRedisConnection)connection;
 		return null;
@@ -1074,7 +1080,7 @@ public class RedisUtil {
 	 * 往可靠中间件的默认队列中发送消息对象
 	 * @param messages 消息对象数组
 	 */
-	public static void send(Object[] messages){
+	public void send(Object[] messages){
 		if(null==messages||0==messages.length) return;
 		leftPush(DEFAULT_QUEUE,messages);
 	}
@@ -1084,7 +1090,7 @@ public class RedisUtil {
 	 * @param queue 队列名称
 	 * @param messages 消息对象序列
 	 */
-	public static void send(String queue,Object... messages){
+	public void send(String queue,Object... messages){
 		if(null==queue||null==messages||queue.trim().isEmpty()||0==messages.length) return;
 		leftPush(queue,messages);
 	}
@@ -1095,7 +1101,7 @@ public class RedisUtil {
 	 * @param queue 队列名称
 	 * @param messages 消息对象序列
 	 */
-	public static void sendAndExpire(String queue,Object... messages){
+	public void sendAndExpire(String queue,Object... messages){
 		sendAndExpire(queue,DEFAULT_EXPIRE,messages);
 	}
 	
@@ -1106,7 +1112,7 @@ public class RedisUtil {
 	 * @param unit 过期时长单位
 	 * @param messages 消息对象序列
 	 */
-	public static void sendAndExpire(String queue,Long expireMills,Object... messages){
+	public void sendAndExpire(String queue,Long expireMills,Object... messages){
 		if(null==queue||null==messages||null==expireMills||0==expireMills||queue.trim().isEmpty()||0==messages.length) return;
 		leftPush(queue,messages);
 		expire(queue,expireMills,TimeUnit.MILLISECONDS);
@@ -1120,7 +1126,7 @@ public class RedisUtil {
 	 * @param messages 发送的消息序列
 	 * @return 接收的消息对象
 	 */
-	public static Object sendAndReceive(String pushQueue,String pullQueue,Object... messages){
+	public Object sendAndReceive(String pushQueue,String pullQueue,Object... messages){
 		return sendAndReceive(pushQueue,pullQueue,QUEUE_MAX_PULL_TIMEOUT,Object.class,messages);
 	}
 	
@@ -1133,7 +1139,7 @@ public class RedisUtil {
 	 * @param messages 发送的消息序列
 	 * @return 接收的消息对象
 	 */
-	public static Object sendAndReceive(String pushQueue,String pullQueue,Long maxWaitMills,Object... messages){
+	public Object sendAndReceive(String pushQueue,String pullQueue,Long maxWaitMills,Object... messages){
 		return sendAndReceive(pushQueue,pullQueue,maxWaitMills,Object.class,messages);
 	}
 	
@@ -1146,7 +1152,7 @@ public class RedisUtil {
 	 * @param messages 发送的消息序列
 	 * @return 接收的消息对象
 	 */
-	public static <R> R sendAndReceive(String pushQueue,String pullQueue,Class<R> returnType,Object... messages){
+	public <R> R sendAndReceive(String pushQueue,String pullQueue,Class<R> returnType,Object... messages){
 		return sendAndReceive(pushQueue,pullQueue,QUEUE_MAX_PULL_TIMEOUT,returnType,messages);
 	}
 	
@@ -1164,7 +1170,7 @@ public class RedisUtil {
 	 * maxWaitMills<0:一直阻塞直到有数据返回为止(不推荐)
 	 * maxWaitMills>0:阻塞直到有数据返回或阻塞超过maxWaitMills时间返回NULL
 	 */
-	public static <R> R sendAndReceive(String pushQueue,String pullQueue,Long maxWaitMills,Class<R> returnType,Object... messages){
+	public <R> R sendAndReceive(String pushQueue,String pullQueue,Long maxWaitMills,Class<R> returnType,Object... messages){
 		if(null==pushQueue||null==messages||pushQueue.trim().isEmpty()||0==messages.length) return null;
 		if(null==pullQueue||null==maxWaitMills||null==returnType) return null;
 		
@@ -1192,7 +1198,7 @@ public class RedisUtil {
 	 * @param channel 通道名称
 	 * @param messages 消息对象序列
 	 */
-	public static void convertAndSend(String channel,Object... messages){
+	public void convertAndSend(String channel,Object... messages){
 		if(null==channel || null==messages || channel.trim().isEmpty() || 0==messages.length) return;
 		for(Object message:messages) redisTemplate.convertAndSend(channel, message);
 	}
@@ -1202,7 +1208,7 @@ public class RedisUtil {
 	 * @param callBack 可调对象
 	 * @return 调用结果
 	 */
-	public static <R> R execute(RedisCallback<R> callBack){
+	public <R> R execute(RedisCallback<R> callBack){
 		return redisTemplate.execute(callBack);
 	}
 	
@@ -1213,7 +1219,7 @@ public class RedisUtil {
 	 * @param args 参数集
 	 * @return 脚本调用结果
 	 */
-	public static <R> R execute(RedisScript<R> luaScript, List<String> keys, Object... args) {
+	public <R> R execute(RedisScript<R> luaScript, List<String> keys, Object... args) {
 		return redisTemplate.execute(luaScript,keys,args);
 	}
 	
@@ -1221,7 +1227,7 @@ public class RedisUtil {
 	 * 获取通用操作模板
 	 * @return RedisTemplate
 	 */
-	public static RedisTemplate template(){
+	public RedisTemplate template(){
 		return redisTemplate;
 	}
 	
@@ -1229,7 +1235,7 @@ public class RedisUtil {
 	 * 获取Redis连接工厂
 	 * @return RedisConnectionFactory
 	 */
-	public static RedisConnectionFactory factory(){
+	public RedisConnectionFactory factory(){
 		return redisTemplate.getConnectionFactory();
 	}
 	
@@ -1238,7 +1244,7 @@ public class RedisUtil {
 	 * @return RedisConnection
 	 * @description 根据底层连接实现返回Redis单点连接或Redis集群连接
 	 */
-	public static RedisConnection connection(){
+	public RedisConnection connection(){
 		return factory().getConnection();
 	}
 	
@@ -1247,7 +1253,7 @@ public class RedisUtil {
 	 * @return RedisSentinelConnection
 	 * @description 根据底层连接实现返回哨兵单点连接或哨兵集群连接
 	 */
-	public static RedisSentinelConnection sentinelConnection(){
+	public RedisSentinelConnection sentinelConnection(){
 		return factory().getSentinelConnection();
 	}
 	
@@ -1255,7 +1261,7 @@ public class RedisUtil {
 	 * 获取value操作工具
 	 * @return ValueOperations
 	 */
-	public static ValueOperations<String,Object> value(){
+	public ValueOperations<String,Object> value(){
 		return valueOperations;
 	}
 	
@@ -1263,7 +1269,7 @@ public class RedisUtil {
 	 * 获取list操作工具
 	 * @return ListOperations
 	 */
-	public static ListOperations<String,Object> list(){
+	public ListOperations<String,Object> list(){
 		return listOperations;
 	}
 	
@@ -1271,7 +1277,7 @@ public class RedisUtil {
 	 * 获取set操作工具
 	 * @return SetOperations
 	 */
-	public static SetOperations<String, Object> set(){
+	public SetOperations<String, Object> set(){
 		return setOperations;
 	}
 	
@@ -1279,7 +1285,7 @@ public class RedisUtil {
 	 * 获取zset操作工具
 	 * @return ZSetOperations
 	 */
-	public static ZSetOperations<String, Object> zset(){
+	public ZSetOperations<String, Object> zset(){
 		return zsetOperations;
 	}
 	
@@ -1287,7 +1293,7 @@ public class RedisUtil {
 	 * 获取hash操作工具
 	 * @return HashOperations
 	 */
-	public static HashOperations<String, String, Object> hash(){
+	public HashOperations<String, String, Object> hash(){
 		return hashOperations;
 	}
 	
@@ -1295,7 +1301,7 @@ public class RedisUtil {
 	 * 获取cluster操作工具
 	 * @return ClusterOperations
 	 */
-	public static ClusterOperations<String,Object> cluster(){
+	public ClusterOperations<String,Object> cluster(){
 		return clusterOperations;
 	}
 	
@@ -1307,7 +1313,7 @@ public class RedisUtil {
      * @param expire 过期时间(单位:秒)
      * @return true 本方法调用前锁已存在,本次加锁失败;false 本方法调用前锁不存在,本次加锁成功
      */
-    public static boolean hasLock(String key, String value, int expire) {
+    public boolean hasLock(String key, String value, int expire) {
         try {
             RedisCallback<Boolean> callback = (connection) -> {
                 return connection.set(key.getBytes(Charset.forName("UTF-8")),
@@ -1329,7 +1335,7 @@ public class RedisUtil {
      * @param value 值
      * @return false 解锁失败,true 解锁成功
      */
-    public static boolean releaseLock(String key, String value) {
+    public boolean releaseLock(String key, String value) {
     	Boolean flag=null;
 		String functionName=funToScriptDict.get("UNLOCK_LUA");
 		if(null!=functionName) {
@@ -1354,7 +1360,7 @@ public class RedisUtil {
      * @param value 需要加锁的VALUE
      * @param expire 过期时间(单位:秒)
      */
-    public static void execute(Runnable task,String key, String value,int... expires) {
+    public void execute(Runnable task,String key, String value,int... expires) {
     	int expire=null==expires || 0==expires.length ? DEFAULT_LOCK_TIMEOUT : expires[0];
     	while(hasLock(key, value, expire)){
     		try {
@@ -1382,7 +1388,7 @@ public class RedisUtil {
      * @param expire 过期时间(单位:秒)
      * @return 泛化类型 
      */
-    public static <R> R execute(Callable<R> task,String key, String value,int... expires) {
+    public <R> R execute(Callable<R> task,String key, String value,int... expires) {
     	int expire=null==expires || 0==expires.length ? DEFAULT_LOCK_TIMEOUT : expires[0];
     	while(hasLock(key, value, expire)){
     		try {
@@ -1413,7 +1419,7 @@ public class RedisUtil {
      * @param t 执行任务的参数列表
      * @return 泛化类型 
      */
-    public static <T,R> R execute(Executable<T,R> task,String key, String value,int expire,T... t) {
+    public <T,R> R execute(Executable<T,R> task,String key, String value,int expire,T... t) {
     	while(hasLock(key, value, expire)){
     		try {
 				Thread.sleep(TRY_LOCK_INTERVAL);

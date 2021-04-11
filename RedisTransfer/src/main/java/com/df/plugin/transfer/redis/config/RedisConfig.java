@@ -79,6 +79,11 @@ public class RedisConfig {
 	private Properties config;
 	
 	/**
+	 * Redis客户端工具
+	 */
+	public RedisUtil redisUtil;
+	
+	/**
 	 * 实时转存的日志文件
 	 */
 	public File transferSaveFile;
@@ -191,7 +196,7 @@ public class RedisConfig {
 		String maxRedirectStr=config.getProperty("maxRedirect","").trim();
 		this.maxRedirect=maxRedirectStr.isEmpty()?(hostList.size()-1):Integer.parseInt(maxRedirectStr);
 		
-		RedisUtil.setRedisTemplate(getRedisTemplate());
+		this.redisUtil=new RedisUtil(getRedisTemplate());
 		
 		return this;
 	}

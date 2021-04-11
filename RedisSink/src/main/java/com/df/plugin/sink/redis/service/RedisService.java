@@ -20,6 +20,11 @@ import com.github.lixiang2114.flow.util.CommonUtil;
 @SuppressWarnings("unchecked")
 public class RedisService {
 	/**
+	 * Redis客户端工具
+	 */
+	private RedisUtil redisUtil;
+	
+	/**
 	 * Redis客户端配置
 	 */
 	private RedisConfig redisConfig;
@@ -33,6 +38,7 @@ public class RedisService {
 	
 	public RedisService(RedisConfig redisConfig){
 		this.redisConfig=redisConfig;
+		this.redisUtil=redisConfig.redisUtil;
 	}
 	
 	/**
@@ -136,7 +142,7 @@ public class RedisService {
 		int times=0;
 		do{
 			try{
-				RedisUtil.set(target, message);
+				redisUtil.set(target, message);
 				loop=false;
 			}catch(Exception e) {
 				times++;
@@ -160,7 +166,7 @@ public class RedisService {
 		int times=0;
 		do{
 			try{
-				RedisUtil.hashSet(target, messageMap);
+				redisUtil.hashSet(target, messageMap);
 				loop=false;
 			}catch(Exception e) {
 				times++;
@@ -210,7 +216,7 @@ public class RedisService {
 		int times=0;
 		do{
 			try{
-				RedisUtil.leftPush(target, messages);
+				redisUtil.leftPush(target, messages);
 				loop=false;
 			}catch(Exception e) {
 				times++;

@@ -63,6 +63,11 @@ public class RedisConfig {
 	public Properties config;
 	
 	/**
+	 * Redis客户端工具
+	 */
+	public RedisUtil redisUtil;
+	
+	/**
 	 * 目标对象名字段
 	 */
 	public String targetField;
@@ -192,7 +197,7 @@ public class RedisConfig {
 		String maxRedirectStr=config.getProperty("maxRedirect","").trim();
 		this.maxRedirect=maxRedirectStr.isEmpty()?(hostList.size()-1):Integer.parseInt(maxRedirectStr);
 		
-		RedisUtil.setRedisTemplate(getRedisTemplate());
+		this.redisUtil=new RedisUtil(getRedisTemplate());
 		
 		//运行时参数初始化
 		String parseStr=config.getProperty("parse","").trim();
