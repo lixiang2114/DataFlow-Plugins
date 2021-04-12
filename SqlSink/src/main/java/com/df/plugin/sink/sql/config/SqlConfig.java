@@ -131,6 +131,11 @@ public class SqlConfig {
 	public Set<Object> preFailSinkSet;
 	
 	/**
+	 * SQL缓存字典
+	 */
+	private ConcurrentHashMap<String,SQLMapper> sqlCache;
+	
+	/**
 	 * 英文逗号正则式
 	 */
 	private static final Pattern COMMA_REGEX=Pattern.compile(",");
@@ -140,16 +145,10 @@ public class SqlConfig {
 	 */
 	private static final Logger log=LoggerFactory.getLogger(SqlConfig.class);
 	
-	/**
-	 * SQL缓存字典
-	 */
-	private static final ConcurrentHashMap<String,SQLMapper> SQL_CACHE=new ConcurrentHashMap<String,SQLMapper>();
-	
-	public SqlConfig(){}
-	
 	public SqlConfig(Flow flow) {
 		this.sinkPath=flow.sinkPath;
 		this.preFailSinkSet=flow.preFailSinkSet;
+		sqlCache=new ConcurrentHashMap<String,SQLMapper>();
 		this.config=PropertiesReader.getProperties(new File(sinkPath,"sink.properties"));
 	}
 	
@@ -249,7 +248,7 @@ public class SqlConfig {
 	public SQLMapper getSqlMapper(String tabFullName) throws Exception {
 		if(isEmpty(tabFullName)) return null;
 		
-		SQLMapper sqlMapper=SQL_CACHE.get(tabFullName);
+		SQLMapper sqlMapper=sqlCache.get(tabFullName);
 		if(null!=sqlMapper) return sqlMapper;
 		
 		ResultSet res=null;
@@ -278,7 +277,7 @@ public class SqlConfig {
 			sqlBuilder.replace(sqlBuilder.length()-1, sqlBuilder.length(), ")");
 			String insertSQL=sqlBuilder.toString();
 			
-			SQL_CACHE.put(tabFullName, sqlMapper=new SQLMapper(tabFullName,insertSQL,fieldMap,getConnection()));
+			sqlCache.put(tabFullName, sqlMapper=new SQLMapper(tabFullName,insertSQL,fieldMap,getConnection()));
 			log.info("add new fieldMap: {}",fieldMap);
 			log.info("add new insertSQL: {}",insertSQL);
 			return sqlMapper;
@@ -376,11 +375,11 @@ public class SqlConfig {
 		map.put("dbIndex", dbIndex);
 		map.put("sinkPath", sinkPath);
 		map.put("tabIndex", tabIndex);
+		map.put("sqlCache", sqlCache);
 		map.put("batchSize", batchSize);
 		map.put("passWord", passWord);
 		map.put("userName", userName);
 		map.put("jdbcDriver", jdbcDriver);
-		map.put("SQL_CACHE", SQL_CACHE);
 		map.put("fieldSeparator", fieldSeparator);
 		map.put("maxRetryTimes", maxRetryTimes);
 		map.put("failMaxWaitMills", failMaxWaitMills);
