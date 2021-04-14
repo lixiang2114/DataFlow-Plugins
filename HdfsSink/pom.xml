@@ -1,0 +1,74 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.df.plugin.sink.hdfs</groupId>
+  <artifactId>HdfsSink</artifactId>
+  <version>1.0</version>
+  <packaging>jar</packaging>
+  
+  <parent>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-parent</artifactId>
+	<version>2.1.15.RELEASE</version>
+  </parent>
+
+  <name>HdfsSink</name>
+  <url>http://maven.apache.org</url>
+
+  <properties>
+  	<maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <dependencies>
+  	<dependency>
+	  <groupId>org.springframework.boot</groupId>
+	  <artifactId>spring-boot-starter-web</artifactId>
+	  <scope>provided</scope>
+	</dependency>
+  	<dependency>
+		<groupId>com.github.lixiang2114.flow</groupId>
+		<artifactId>DataFlow</artifactId>
+		<version>3.0</version>
+		<scope>provided</scope>
+	</dependency>
+	<dependency>
+	    <groupId>org.apache.hadoop</groupId>
+	    <artifactId>hadoop-client-api</artifactId>
+	    <version>3.2.2</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.apache.hadoop</groupId>
+	    <artifactId>hadoop-client-runtime</artifactId>
+	    <version>3.2.2</version>
+	</dependency>
+	<!-- 
+	因为上面引入hadoop依赖时默认会引入抽象日志接口层commons-logging,
+	该抽象日志接口会覆盖SpringBoot中默认的抽象日志接口slf4j,这样slf4j就不会被自动依赖进来,
+	但我们的工程项目需要使用slf4j作为抽象日志层来输出日志,所以我们需要手动显式引入slf4j的依赖,
+	不然会发生包/类找不到的错误
+	-->
+	<dependency>
+	    <groupId>org.slf4j</groupId>
+	    <artifactId>slf4j-api</artifactId>
+	</dependency>
+  </dependencies>
+  
+  <build>
+		<plugins>
+			<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+		</plugins>
+	</build>
+</project>
