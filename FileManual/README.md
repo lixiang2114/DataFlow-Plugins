@@ -23,4 +23,6 @@ unzip  /install/zip/fileManual.zip -d /software/DataFlow-3.0/plugins/
 |multiThread|并发扫描|false|scanType=path时，用于定义是否需要并发扫描的开关|
 
 ##### 备注：  
-虽然并发扫描模式可以提升读取文件的效率，但是并不利于读取数据的精准和安全，因此我们一般还是使用串行方式扫描读取目录下的每个文件（即：multiThread缺省值为false）；manualFile和manualPath两个参数二选其一即可，但必须至少有一个参数值被显式给出，否则等于放弃使用本插件；readedFile参数的值仅仅指定的是一个不含路径的文件名，该文件的路径为插件运行时目录。  
+1. 虽然并发扫描模式可以提升读取文件的效率，但是并不利于读取数据的精准和安全，因此我们一般还是使用串行方式扫描读取目录下的每个文件（即：multiThread缺省值为false）。  
+2. manualFile和manualPath两个参数二选其一即可，但必须至少有一个参数值被显式给出，否则等于放弃使用本插件。  
+3. readedFile参数的值仅仅指定的是一个不含路径的文件名，该文件的路径为插件运行时目录。    
