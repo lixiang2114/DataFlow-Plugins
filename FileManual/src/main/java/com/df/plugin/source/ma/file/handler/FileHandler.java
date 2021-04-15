@@ -13,7 +13,7 @@ import com.github.lixiang2114.flow.comps.Channel;
 
 /**
  * @author Lixiang
- * @description 同步文件操作器
+ * @description 异步文件操作器
  */
 public class FileHandler implements Callable<Boolean>{
 	/**

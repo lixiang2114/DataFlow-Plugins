@@ -16,7 +16,7 @@ import com.github.lixiang2114.flow.scheduler.SchedulerPool;
 
 /**
  * @author Lixiang
- * @description 日志文件服务
+ * @description 数据文件服务
  */
 public class FileService {
 	/**
@@ -50,7 +50,7 @@ public class FileService {
 	}
 	
 	/**
-	 * 启动离线ETL流程(读取预置日志文件)
+	 * 启动离线ETL流程(读取预置数据文件)
 	 * @param sourceToFilterChannel 下游通道对象
 	 * @return 是否执行成功
 	 * @throws Exception
@@ -89,7 +89,7 @@ public class FileService {
 				asyncRead(fileConfig.manualPath,threadPool);
 			}else{ //串行递归扫描每个文件
 				log.info("sync hand multi file...");
-				if(null!=fileConfig.manualFile) {
+				if(null!=fileConfig.manualFile && !fileConfig.readedFiles.contains(fileConfig.manualFile.getAbsolutePath())) {
 					if(!disposeFile()) return false;
 					fileConfig.readedFiles.add(fileConfig.manualFile.getAbsolutePath());
 				}

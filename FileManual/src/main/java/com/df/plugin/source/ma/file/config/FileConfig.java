@@ -39,14 +39,19 @@ public class FileConfig {
 	public File pluginPath;
 	
 	/**
-	 * 离线推送的文件
+	 * 离线扫描的文件
 	 */
 	public File manualFile;
 	
 	/**
-	 * 离线推送的目录
+	 * 离线扫描的目录
 	 */
 	public File manualPath;
+	
+	/**
+	 * 数据文件(检查点)配置
+	 */
+	public Properties config;
 	
 	/**
 	 * 离线文件已经读取的行数
@@ -74,11 +79,6 @@ public class FileConfig {
 	public boolean multiThread;
 	
 	/**
-	 * 日志(检查点)配置
-	 */
-	public Properties loggerConfig;
-	
-	/**
 	 * 已读取的文件列表
 	 */
 	public HashSet<String> readedFiles;
@@ -104,16 +104,16 @@ public class FileConfig {
 	 */
 	public FileConfig config() {
 		File configFile=new File(pluginPath,"source.properties");
-		loggerConfig=PropertiesReader.getProperties(configFile);
+		this.config=PropertiesReader.getProperties(configFile);
 		
-		String scanTypeStr=loggerConfig.getProperty("scanType","").trim();
+		String scanTypeStr=config.getProperty("scanType","").trim();
 		this.scanType=scanTypeStr.isEmpty()?ScanType.file:ScanType.valueOf(scanTypeStr);
 		
 		if(ScanType.file==scanType) {
-			String manualFileName=loggerConfig.getProperty("manualFile","").trim();
+			String manualFileName=config.getProperty("manualFile","").trim();
 			if(manualFileName.isEmpty()) {
-				log.error("not found parameter: 'manualFile',can not offline send with manual...");
-				throw new RuntimeException("not found parameter: 'manualFile',can not offline send with manual...");
+				log.error("not found parameter: 'manualFile',can not offline scan with manual...");
+				throw new RuntimeException("not found parameter: 'manualFile',can not offline scan with manual...");
 			}else{
 				File file=new File(manualFileName);
 				if(!file.exists()){
@@ -129,10 +129,10 @@ public class FileConfig {
 				manualFile=file;
 			}
 		}else{
-			String manualPathName=loggerConfig.getProperty("manualPath","").trim();
+			String manualPathName=config.getProperty("manualPath","").trim();
 			if(manualPathName.isEmpty()) {
-				log.error("not found parameter: 'manualPath',can not offline send with manual...");
-				throw new RuntimeException("not found parameter: 'manualPath',can not offline send with manual...");
+				log.error("not found parameter: 'manualPath',can not offline scan with manual...");
+				throw new RuntimeException("not found parameter: 'manualPath',can not offline scan with manual...");
 			}else{
 				File file=new File(manualPathName);
 				if(!file.exists()){
@@ -149,11 +149,11 @@ public class FileConfig {
 			}
 		}
 		
-		String multiThreadStr=loggerConfig.getProperty("multiThread","").trim();
+		String multiThreadStr=config.getProperty("multiThread","").trim();
 		this.multiThread=multiThreadStr.isEmpty()?false:Boolean.parseBoolean(multiThreadStr);
 		
 		if(!multiThread && ScanType.path==scanType) {
-			String readedFileStr=loggerConfig.getProperty("readedFile","").trim();
+			String readedFileStr=config.getProperty("readedFile","").trim();
 			this.readedSetFile=new File(pluginPath,readedFileStr.isEmpty()?"readedFiles.ini":readedFileStr).toPath();
 			try {
 				this.readedFiles=new HashSet<String>(Files.readAllLines(readedSetFile, StandardCharsets.UTF_8));
@@ -162,10 +162,10 @@ public class FileConfig {
 			}
 		}
 		
-		String lineNumberStr=loggerConfig.getProperty("lineNumber","").trim();
+		String lineNumberStr=config.getProperty("lineNumber","").trim();
 		this.lineNumber=lineNumberStr.isEmpty()?0:Integer.parseInt(lineNumberStr);
 		
-		String byteNumberStr=loggerConfig.getProperty("byteNumber","").trim();
+		String byteNumberStr=config.getProperty("byteNumber","").trim();
 		this.byteNumber=byteNumberStr.isEmpty()?0:Integer.parseInt(byteNumberStr);
 		
 		log.info("lineNumber is: "+lineNumber+",byteNumber is: "+byteNumber);
@@ -177,10 +177,10 @@ public class FileConfig {
 	 * @throws IOException
 	 */
 	public void refreshCheckPoint() throws IOException{
-		loggerConfig.setProperty("lineNumber",""+lineNumber);
-		loggerConfig.setProperty("byteNumber",""+byteNumber);
-		if(null!=manualFile) loggerConfig.setProperty("manualFile", manualFile.getAbsolutePath());
-		if(null!=manualPath) loggerConfig.setProperty("manualPath", manualPath.getAbsolutePath());
+		config.setProperty("lineNumber",""+lineNumber);
+		config.setProperty("byteNumber",""+byteNumber);
+		if(null!=manualFile) config.setProperty("manualFile", manualFile.getAbsolutePath());
+		if(null!=manualPath) config.setProperty("manualPath", manualPath.getAbsolutePath());
 		
 		if(null!=readedFiles && !readedFiles.isEmpty()) {
 			if(null!=readedSetFile) Files.write(readedSetFile, readedFiles, StandardCharsets.UTF_8, StandardOpenOption.CREATE,StandardOpenOption.TRUNCATE_EXISTING);
@@ -190,7 +190,7 @@ public class FileConfig {
 		try{
 			fos=new FileOutputStream(new File(pluginPath,"source.properties"));
 			log.info("reflesh checkpoint...");
-			loggerConfig.store(fos, "reflesh checkpoint");
+			config.store(fos, "reflesh checkpoint");
 		}finally{
 			if(null!=fos) fos.close();
 		}
