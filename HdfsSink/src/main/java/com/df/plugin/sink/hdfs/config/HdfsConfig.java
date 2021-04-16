@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 
 import com.github.lixiang2114.flow.comps.Flow;
 import com.github.lixiang2114.flow.context.SizeUnit;
-import com.github.lixiang2114.flow.util.ClassLoaderUtil;
 import com.github.lixiang2114.flow.util.CommonUtil;
 import com.github.lixiang2114.flow.util.PropertiesReader;
 
@@ -50,7 +49,7 @@ public class HdfsConfig {
 	public Long maxFileSize;
 	
 	/**
-	 * 历史数据文件钝化最大时间
+	 * 历史数据文件钝化最大时间(单位:天)
 	 * 默认为30天,超过钝化时间没有访问则会被自动删除
 	 */
 	public Integer maxHistory;
@@ -100,7 +99,6 @@ public class HdfsConfig {
 	public HdfsConfig(Flow flow){
 		this.sinkPath=flow.sinkPath;
 		this.batchFile=new File(sinkPath,"tmp/buffer.dat");
-		ClassLoaderUtil.addFileToCurrentClassPath(new File(sinkPath,"etc"));
 		this.config=PropertiesReader.getProperties(new File(sinkPath,"sink.properties"));
 	}
 	
@@ -145,12 +143,14 @@ public class HdfsConfig {
 		String maxBatchByteStr=config.getProperty("maxBatchBytes", "").trim();
 		this.maxBatchBytes=maxBatchByteStr.isEmpty()?100:Integer.parseInt(maxBatchByteStr);
 		
-		long expireInMills=maxHistory*86400*1000;
 		RemoteIterator<LocatedFileStatus> fileList=fileSystem.listFiles(hdfsPath, true);
 		while(fileList.hasNext()) {
 			LocatedFileStatus fileStatus=fileList.next();
-			if(System.currentTimeMillis()-fileStatus.getAccessTime()>expireInMills) {
-				fileSystem.delete(fileStatus.getPath(), true);
+			long expireDays=(System.currentTimeMillis()-fileStatus.getAccessTime())/86400000;
+			if(expireDays>maxHistory) {
+				Path expireFile=fileStatus.getPath();
+				fileSystem.delete(expireFile, true);
+				log.info("expire timeout: {}d,delete expire hdfs file: {}",expireDays,expireFile.toString());
 			}
 		}
 		

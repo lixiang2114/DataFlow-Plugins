@@ -46,7 +46,7 @@ public class HdfsConfig {
 	public Path hdfsPath;
 	
 	/**
-	 * 插件目录
+	 * 插件运行时路径
 	 */
 	public File pluginPath;
 	
@@ -114,15 +114,13 @@ public class HdfsConfig {
 	
 	public HdfsConfig(Flow flow){
 		this.pluginPath=(this.flow=flow).sourcePath;
+		this.config=PropertiesReader.getProperties(new File(pluginPath,"source.properties"));
 	}
 	
 	/**
 	 * @param config
 	 */
 	public HdfsConfig config() throws IOException{
-		File configFile=new File(pluginPath,"source.properties");
-		config=PropertiesReader.getProperties(configFile);
-		
 		String scanTypeStr=config.getProperty("scanType","").trim();
 		this.scanType=scanTypeStr.isEmpty()?ScanType.file:ScanType.valueOf(scanTypeStr);
 		
@@ -140,7 +138,7 @@ public class HdfsConfig {
 					this.fileSystem=FileSystem.get(hdfsFile.toUri(), new Configuration(), hadoopUser);
 				} catch (Exception e) {
 					log.error("create file system occur exception...");
-					throw new RuntimeException("create file system occur exception...");
+					throw new RuntimeException("create file system occur exception...",e);
 				}
 				
 				if(!fileSystem.exists(hdfsFile)){
@@ -166,7 +164,7 @@ public class HdfsConfig {
 					this.fileSystem=FileSystem.get(hdfsPath.toUri(), new Configuration(), hadoopUser);
 				} catch (Exception e) {
 					log.error("create file system occur exception...");
-					throw new RuntimeException("create file system occur exception...");
+					throw new RuntimeException("create file system occur exception...",e);
 				}
 				
 				if(!fileSystem.exists(hdfsPath)) {
