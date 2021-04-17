@@ -26,6 +26,6 @@ unzip  /install/zip/hdfsManual.zip -d /software/DataFlow-3.0/plugins/
 
 ##### 备注：  
 1. 虽然并发扫描模式可以提升读取文件的效率，但是并不利于读取数据的精准和安全，因此我们一般还是使用串行方式扫描读取目录下的每个文件（即：multiThread缺省值为false）。  
-2. 该插件中内置etc配置目录，若名称节点NameNode为高可用集群，则通常需要将core-site.xml、hdfs-site.xml、mapred-site.xml和yarn-site.xml四个配置文件同时放入此配置目录，同时还需在hdfsManual.properties主配置文件的classPath属性值中追加etc目录以装载它们。  
+2. 该插件中内置etc配置目录，若名称节点NameNode为高可用集群，则通常需要将core-site.xml、hdfs-site.xml、mapred-site.xml和yarn-site.xml四个配置文件同时放入此配置目录，同时还需在hdfsManual.properties主配置文件的classPath属性值中追加etc目录以装载它们。装载这些配置文件并不影响单点NameNode的连接，只要source.properties配置文件中的hdfs路径反映的主机例程名(可能为ip:port或ns1等)正确即可。  
 3. hdfsFile和hdfsPath两个参数二选其一即可，但必须至少有一个参数值被显式给出，否则等于放弃使用本插件。  
 4. readedFile参数的值仅仅指定的是一个不含路径的文件名，该文件的路径为插件运行时目录。   
