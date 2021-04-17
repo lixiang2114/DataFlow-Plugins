@@ -23,5 +23,6 @@ unzip  /install/zip/hdfsSink.zip -d /software/DataFlow-3.0/plugins/
 
 ##### 备注：  
 1. 目标分布式数据文件仅按尺寸实现滚动记录，与时间无关(因为HDFS是海量级分布式文件存储系统)，这与其它Sink插件有区别。  
-2. maxBatchBytes参数值越小，实时性越高，但IO频次会增大，资源消耗较快；反之，maxBatchBytes参数值越大，则吞吐量越大，数据传输效率越高，但实时性会随之下降，使用者可根据生产环境酌情优化。  
-3. 根据Hadoop架构设计原理，maxFileSize参数值不应过小，maxFileSize参数值越小则磁盘IO和网络IO频率越高，这将增大MapReduce框架在集群中的计算负载，一般认为该参数在保证业务数据文件可维护的前提下尽可能的增大，以减少文件块的数量来保证后续更高效率的分布式计算过程。    
+2. 该插件中内置etc配置目录，若名称节点NameNode为高可用集群，则通常需要将core-site.xml、hdfs-site.xml、mapred-site.xml和yarn-site.xml四个配置文件同时放入此配置目录，同时还需在hdfsSink.properties主配置文件的classPath属性值中追加etc目录以装载它们。  
+3. maxBatchBytes参数值越小，实时性越高，但IO频次会增大，资源消耗较快；反之，maxBatchBytes参数值越大，则吞吐量越大，数据传输效率越高，但实时性会随之下降，使用者可根据生产环境酌情优化。  
+4. 根据Hadoop架构设计原理，maxFileSize参数值不应过小，maxFileSize参数值越小则磁盘IO和网络IO频率越高，这将增大MapReduce框架在集群中的计算负载，一般认为该参数在保证业务数据文件可维护的前提下尽可能的增大，以减少文件块的数量来保证后续更高效率的分布式计算过程。    

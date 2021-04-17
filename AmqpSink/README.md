@@ -35,7 +35,7 @@ unzip  /install/zip/amqpSink.zip -d /software/DataFlow-3.0/plugins/
 2. hostList参数值可以有多项，项与项之间使用英文逗号分隔，主机名（或IP地址）与端口之间使用英文冒号分隔即可  
 3. routeBinds参数中各项路由绑定使用英文逗号分隔，每项路由绑定中的组件之间使用英文分号分隔，其中组件名称与组件类型（路由键没有组件类型）之间使用英文冒号分隔；每项路由绑定中的第一个组件为AMQP服务器路由的目标组件，该组件可以为队列或交换器类型，第二个组件为AMQP服务器路由的源交换器组件，该组件必须为交换器类型，第三个组件为路由键名称，它没有类型概念并且为可选组件（当源交换器为fanout模式时，路由键可为空）。队列类型只有queue、交换器类型有direct、fanout和topic可选。参数值即为如下格式：  
 queue1:queue;exchange1:direct;routKey1,exchange3:direct;exchange2:fanout,queue2:queue;exchange3:direct;routKey2  
-4. 约定"交换器名称+路由键名称"被称为支持AMQP协议服务器的复合索引，下同。本插件关于上游通道的输入格式举例如下：  
+4. 约定"交换器名称+路由键名称"被称为支持AMQP协议服务器的复合索引，下同。其中路由键为自定义，原则上只要交换器在AMQP服务中定义，那么AMQP客户端的连接就不会有问题，但不保证发送的数据可以成功推送到AMQP消费者端，因为这还取决于AMQP服务器上的复合索引是否绑定了相应的路由和队列。本插件关于上游通道的输入格式举例如下：  
 ```Text
 1、parse=true输入格式举例:
 #推送到默认复合索引
