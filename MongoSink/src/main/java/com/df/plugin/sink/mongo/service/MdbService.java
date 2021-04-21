@@ -381,7 +381,12 @@ public class MdbService {
 		if(value instanceof String) {
 			String str=value.toString().trim();
 			if(str.isEmpty()) return null;
-			Timestamp ts=Timestamp.valueOf(str);
+			Timestamp ts=null;
+			if(CommonUtil.isInteger(str)) {
+				ts=new Timestamp(Long.parseLong(str));
+			}else{
+				ts=Timestamp.valueOf(str);
+			}
 			ts.setTime(ts.getTime()+mdbConfig.timeZoneMillis);
 			return ts;
 		}else{
