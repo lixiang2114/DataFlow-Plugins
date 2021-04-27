@@ -34,3 +34,10 @@ unzip  /install/zip/hbaseSink.zip -d /software/DataFlow-3.0/plugins/
 2. hostList参数的地址实际上是Zookeeper集群的地址，该集群用于实现Hbase集群中HMaster例程的高可用。  
 3. 往Hbase数据库中插入数据时，Hbase自动将插入的数据按行键rowKey进行排序并插入合适的行序位置上。  
 4. Hbase属于NOSQL数据库，其数据库在Hbase中又被称为表空间，表中的键值对数据被存放在行键索引的每个列族表中。  
+5. 有序字典输入格式采用JSON字典对象表现层次结构，每条json记录中可以包含多个表的记录，粒度可以达到表级最大化，非常灵活；而字段序列输入格式的每条记录表现的粒度为最小化，即：一个键值为一条记录。  
+        
+##### 输入格式举例：  
+1. parse=true时，采用字段序列输入，即：table#rowKey#family#key#value，如：  
+wa:tuser#001#base#userName#ligang  
+2. parse=false时，采用有序字典输入，即：{table:{rowKey:{family:{key:value}}}}，如：  
+{"wa:tuser":{"001":{"base":{"userName":"zhangsan"}}}}
