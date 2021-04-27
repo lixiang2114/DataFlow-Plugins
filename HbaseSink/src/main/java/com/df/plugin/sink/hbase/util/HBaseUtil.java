@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -41,7 +42,7 @@ import org.apache.hadoop.hbase.filter.PageFilter;
 
 /**
  * @author Lixiang
- * @description Hbase工具
+ * @description Hbase通用工具集
  */
 public class HBaseUtil {
 	/**
@@ -127,14 +128,6 @@ public class HBaseUtil {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	/**
-	 * 设置最大版本值
-	 * @param mxVersion 最大版本值
-	 */
-	public void setMxVersion(int maxVersion) {
-		this.maxVersion = maxVersion;
 	}
 
 	/**
@@ -426,8 +419,9 @@ public class HBaseUtil {
 	 * @param startRowKey 起始行键
 	 * @param countLimit 页面记录数量
 	 * @throws Exception 抛出异常对象
+	 * @return 有序行字典表
 	 */
-	public List<Map<String,Map<String,Object>>> pageGet(String tabName,String startRowKey,long countLimit) throws Exception{
+	public LinkedHashMap<String, Map<String, Map<String, Object>>> pageGet(String tabName,String startRowKey,long countLimit) throws Exception{
 		TableName tableName=TableName.valueOf(tabName);
 		if(!admin.tableExists(tableName)) return null;
 		
@@ -439,10 +433,9 @@ public class HBaseUtil {
 		ResultScanner ress=table.getScanner(scan);
 		if(null==ress) return null;
 		
-		List<Map<String,Map<String,Object>>> resultList=getRowListByScanner(ress);
+		LinkedHashMap<String, Map<String, Map<String, Object>>> rowMap=getRowListByScanner(ress);
 		table.close();
-		
-		return resultList;
+		return rowMap;
 	}
 	
 	/**
@@ -458,26 +451,25 @@ public class HBaseUtil {
 	 * 将查询结果集包装为List集合返回
 	 * @param ress 结果集迭代器
 	 * @return 记录列表
-	 * @description 返回记录列表,exam:[Map<family,Map<key,value>>1,Map<family,Map<key,value>>2...]
+	 * @description 返回记录列表,exam:Map<rowKey,Map<family,Map<key,value>>>
 	 */
-	private List<Map<String,Map<String,Object>>> getRowListByScanner(ResultScanner ress) throws Exception{
-		Map<String,Map<String,Object>> familyMap=null;
-		List<Map<String,Map<String,Object>>> list=new ArrayList<Map<String,Map<String,Object>>>();
-		for(Result res:ress){
+	private LinkedHashMap<String,Map<String,Map<String,Object>>> getRowListByScanner(ResultScanner ress) throws Exception{
+		LinkedHashMap<String,Map<String,Map<String,Object>>> rowMap=new LinkedHashMap<String,Map<String,Map<String,Object>>>();
+		for(Result res:ress) {
+			String rowKey=new String(res.getRow());
+			Map<String, Map<String, Object>> familyMap=rowMap.get(rowKey);
+			if(null==familyMap) rowMap.put(rowKey, familyMap=new HashMap<String, Map<String, Object>>());
 			List<Cell> cells=res.listCells();
-			Map<String,Object> fieldMap=null;
-			familyMap=new HashMap<String,Map<String,Object>>();
-			for(Cell cell:cells){
+			for(Cell cell:cells) {
 				String family=new String(CellUtil.cloneFamily(cell));
 				String fieldKey=new String(CellUtil.cloneQualifier(cell));
 				Object fieldValue=getObject(CellUtil.cloneValue(cell));
-				fieldMap=familyMap.get(family);
+				Map<String,Object> fieldMap=familyMap.get(family);
 				if(null==fieldMap) familyMap.put(family, fieldMap=new HashMap<String,Object>());
 				fieldMap.put(fieldKey, fieldValue);
 			}
-			list.add(familyMap);
 		}
-		return list;
+		return rowMap;
 	}
 	
 	/**
