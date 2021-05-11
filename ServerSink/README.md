@@ -3,37 +3,38 @@
       
 
 ### 下载与安装  
-wget https://github.com/lixiang2114/DataFlow-Plugins/raw/main/SqlSink/dst/sqlSink.zip -d /install/zip/  
-unzip  /install/zip/sqlSink.zip -d /software/DataFlow-3.0/plugins/    
+wget https://github.com/lixiang2114/DataFlow-Plugins/raw/main/ServerSink/dst/serverSink.zip -d /install/zip/  
+unzip  /install/zip/serverSink.zip -d /software/DataFlow-3.0/plugins/    
 
 ##### 备注：  
 插件配置路径：  
- /software/DataFlow-3.0/plugins/sqlSink/sink.properties  
+ /software/DataFlow-3.0/plugins/serverSink/sink.properties  
       
 
 ### 参数值介绍  
 |参数名称|参数含义|缺省默认|备注说明|
 |:-----:|:-------:|:-------:|:-------:|
-|parse|是否解析|true|默认值为true表示解析数据记录为字典，否则按json字串反序列化为字典|
-|dbField|数据库字段|无|parse=false时，用于从记录字典提取数据库名称的字段名称|
-|tabField|数据表字段|无|parse=false时，用于从记录字典提取数据表名称的字段名称|
-|dbIndex|数据库索引|无|parse=true时，用于解析数据库名称的记录字段索引|
-|tabIndex|数据表索引|无|parse=true时，用于解析数据表名称的记录字段索引|
-|batchSize|批量尺寸|无|每个批次推送的文档数量，若为NULL则每条记录推送一次|
-|userName|登录用户|无|登录数据库服务用户名，用户名或密码为NULL则免密登录数据库|
-|passWord|登录密码|无|登录数据库服务密码，用户名或密码为NULL则免密登录数据库|
-|defaultDB|默认数据库|无|当数据记录中无法解析或提取数据库名称时使用该默认值|
-|defaultTab|默认数据表|无|当数据记录中无法解析或提取数据表名称时使用该默认值|
-|jdbcDriver|JDBC驱动|MySql驱动|本插件客户端用于访问SQL关系数据库的驱动程序|
-|fieldSeparator|字段分隔符|所有空白字符|parse=true时，用于解析上游通道记录的字段分隔符|
-|maxRetryTimes|重试次数|3|推送数据记录到SQL关系数据库失败后的最大重试次数|
-|failMaxTimeMills|失败等待|2000|推送数据记录失败后，前后两次重试之间的时间间隔(单位:毫秒)|
-|connectionString|连接地址|MySql连接|本插件用于访问SQL关系数据库的连接地址字符串，地址可附带连接参数|
-|batchMaxTimeMills|批次等待|2000|本插件支持批量推送，该参数为等待每个批次的最大时间阈值(单位:毫秒)|
+|port|服务端口|1567|反向推送服务端口|
+|protocol|服务协议|TCP|反向推送服务协议，可选值有：TCP，HTTP|
+|recvType|接收类型|MessageBody|可选值:ParamMap、QueryString、StreamBody、MessageBody|
+|passField|用户字段|无|requireLogin=true时，用于表示登录提交的密码字段名称|
+|userField|密码字段|无|requireLogin=true时，用于表示登录提交的用户名字段名称|
+|passWord|密码|无|requireLogin=true时，用于表示登录本插件的密码参数值|
+|userName|用户|无|requireLogin=true时，用于表示登录本插件的用户名参数值|
+|authorMode|认证模式|auto|requireLogin=true时，认证模式可选值:query、base、auto|
+|lineNumber|行号检查点|0|反向推送服务对缓冲文件行号的检查点|
+|byteNumber|字节检查点|0|反向推送服务对缓冲文件字节位置的检查点|
+|lineSeparator|输出分隔符|\n|反向推送服务数据输出分隔符|
+|keepSession|是否保持会话|false|是否为HTTP协议的服务保持会话连续|
+|delOnReaded|删除已读缓冲|true|是否自动删除已经读取完毕的缓冲文件|
+|requireLogin|是否需要登录|false|客户端扫描本插件服务拉取数据前是否需要登录|
+|loginFailureId|登录失败反馈|NO|requireLogin=true时，WEB客户端登录失败后接收到的ACK消息|
+|loginSuccessId|登录成功反馈|OK|requireLogin=true时，WEB客户端登录成功后接收到的ACK消息|
+|transferSaveFile|转存缓冲文件|buffer.log.0|用于转存实时消息记录的缓冲文件名|
+|httpBatchSendSize|批量发送尺寸|100|HTTP服务批量发送记录的数量|
+|maxBatchWaitMills|批次等待时间|15000|缓冲服务拉取上游通道数据的最大等待时间|
+|transferSaveMaxSize|转存文件尺寸|2GB|转存实时消息记录的缓冲文件最大尺寸|
+|pushOnLoginSuccess|单段即时推送|true|是否在登录成功之后立即推送数据|
 ##### 备注：  
-1. 若关系数据库为主从同步架构，请将本插件对接到主库服务器上。  
-2. 若关系数据库启用了代理服务，请将本插件对接到代理服务器上。  
-3. jdbcDriver的默认值为常用关系数据库MySql的驱动，即：com.mysql.cj.jdbc.Driver  
-4. connectionString的默认值为常用关系数据库MySql的本地连接字符串，即：  
-jdbc:mysql://127.0.0.1:3306/?useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&useSSL=false&  
-serverTimezone=GMT%2B8  
+1. 针对TCP协议而言，keepSession参数保持的是进程级别的全局会话。  
+2. recvType为HTTP服务接收的MIME类型，仅在protocol=HTTP时有效。  

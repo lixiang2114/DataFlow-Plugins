@@ -18,10 +18,10 @@ unzip  /install/zip/httpTransfer.zip -d /software/DataFlow-3.0/plugins/
 |port|服务端口|8080|HTTP服务端绑定的WEB端口，默认绑定所有网卡IP地址|
 |recvType|接收类型|MessageBody|类型可选值:ParamMap、QueryString、StreamBody、MessageBody|
 |requireLogin|是否登录|true|WEB客户端访问本插件绑定的WEB服务是否需要登录|
-|userName|用户名|无|requireLogin=true时，用于表示提交的密码参数值|
-|passWord|密码|无|requireLogin=true时，用于表示提交的用户名参数值|
-|userField|密码字段|无|requireLogin=true时，用于表示提交的密码字段名称|
-|passField|用户名字段|无|requireLogin=true时，用于表示提交的用户名字段名称|
+|userName|用户名|无|requireLogin=true时，用于表示提交的用户名参数值|
+|passWord|密码|无|requireLogin=true时，用于表示提交的密码参数值|
+|userField|密码字段|无|requireLogin=true时，用于表示提交的用户名字段名称|
+|passField|用户名字段|无|requireLogin=true时，用于表示提交的密码字段名称|
 |errorReply|异常响应|NO|WEB客户端访问本插件服务发生异常时的ACK响应值|
 |normalReply|正常响应|OK|WEB客户端访问本插件服务正常时的ACK响应值|
 |authorMode|认证模式|auto|requireLogin=true时，认证模式可选值:query、base、auto|
