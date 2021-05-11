@@ -39,3 +39,6 @@ unzip  /install/zip/serverSink.zip -d /software/DataFlow-3.0/plugins/
 1. 针对TCP协议而言，keepSession参数保持的是进程级别的全局会话。  
 2. recvType为HTTP服务接收的MIME类型，仅在protocol=HTTP时有效。  
 3. 本插件主要应用到第三方通过服务模式主动扫描获取数据的场景，如：Spark-Streaming
+4. 通常情况下，TCP协议可能会拥有比HTTP协议更高的数据传输效率，但TCP传输大多应用到内网 
+5. 在内网传输数据，请将登录开关参数requireLogin设置为false，同时将会话保持参数keepSession设置为false，这将忽略每次请求的登录检查逻辑；同时不会维护客户端的会话状态，从而可在内网获得更高层级的数据传输效率
+6. TCP协议模式下，数据传输依赖于长连接实现，其会话是全局的，即所有客户端共享同一个会话，请不要依赖于TCP传输协议设计任何会话隔离逻辑；HTTP协议模式下，数据传输依赖于Web请求响应模式实现，客户端的每次请求将被回应一个设定好的最大批次数据量，其会话是客户端隔离级别，这允许多个客户端并发拉取本插件的反向服务数据。   
