@@ -63,9 +63,13 @@ public class ServerSink extends SinkPluginAdapter {
 		this.bufferService=new BufferService(config);
 		
 		if(ServerProtocol.TCP==config.protocol) {
-			this.server=new TcpServer(new ServerConfig(config.port,config,TcpService.class));
+			ServerConfig serverConfig=new ServerConfig(config.port,config,TcpService.class);
+			serverConfig.enableHttpSession=config.keepSession;
+			this.server=new TcpServer(serverConfig);
 		}else{
-			this.server=new HttpServer(new ServerConfig(config.port,config,HttpService.class));
+			ServerConfig serverConfig=new ServerConfig(config.port,config,HttpService.class);
+			serverConfig.enableHttpSession=config.keepSession;
+			this.server=new HttpServer(serverConfig);
 		}
 		
 		return true;

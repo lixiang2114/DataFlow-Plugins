@@ -81,16 +81,6 @@ public class ContextConfig {
 	private Properties config;
 	
 	/**
-	 * 错误回应
-	 */
-	public String errorReply;
-	
-	/**
-	 * 正常回应
-	 */
-	public String normalReply;
-	
-	/**
 	 * HTTP认证模式
 	 * query:查询字串模式
 	 * base:基础认证模式
@@ -252,12 +242,6 @@ public class ContextConfig {
 		String lineSeparatorStr=config.getProperty("lineSeparator","").trim();
 		this.lineSeparator=lineSeparatorStr.isEmpty()?"\n":lineSeparatorStr;
 		
-		String normalReplyStr=config.getProperty("normalReply","").trim();
-		this.normalReply=normalReplyStr.isEmpty()?"OK":normalReplyStr;
-		
-		String errorReplyStr=config.getProperty("errorReply","").trim();
-		this.errorReply=errorReplyStr.isEmpty()?"NO":errorReplyStr;
-		
 		String portStr=config.getProperty("port","").trim();
 		this.port=portStr.isEmpty()?1567:Integer.parseInt(portStr);
 		
@@ -388,10 +372,28 @@ public class ContextConfig {
 	 */
 	public String collectRealtimeParams() {
 		HashMap<String,Object> map=new HashMap<String,Object>();
+		map.put("port", port);
+		map.put("protocol", protocol);
 		map.put("sinkPath", sinkPath);
+		map.put("userField", userField);
+		map.put("passField", passField);
+		map.put("recvType", recvType);
+		map.put("passWord", passWord);
+		map.put("userName", userName);
+		map.put("lineNumber", lineNumber);
+		map.put("keepSession", keepSession);
+		map.put("authorMode", authorMode);
+		map.put("requireLogin", requireLogin);
+		map.put("byteNumber", byteNumber);
+		map.put("lineSeparator", lineSeparator);
+		map.put("loginFailureId", loginFailureId);
+		map.put("delOnReaded", delOnReaded);
+		map.put("loginSuccessId", loginSuccessId);
 		map.put("transferSaveFile", transferSaveFile);
 		map.put("maxBatchWaitMills", maxBatchWaitMills);
+		map.put("httpBatchSendSize", httpBatchSendSize);
 		map.put("transferSaveMaxSize", transferSaveMaxSize);
+		map.put("pushOnLoginSuccess", pushOnLoginSuccess);
 		map.put("defaultTransferSaveFile", defaultTransferSaveFile);
 		return map.toString();
 	}
