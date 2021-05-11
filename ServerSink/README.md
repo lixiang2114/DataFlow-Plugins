@@ -19,8 +19,8 @@ unzip  /install/zip/serverSink.zip -d /software/DataFlow-3.0/plugins/
 |recvType|接收类型|MessageBody|可选值:ParamMap、QueryString、StreamBody、MessageBody|
 |passField|用户字段|无|requireLogin=true时，用于表示登录提交的密码字段名称|
 |userField|密码字段|无|requireLogin=true时，用于表示登录提交的用户名字段名称|
-|passWord|密码|无|requireLogin=true时，用于表示登录本插件的密码参数值|
-|userName|用户|无|requireLogin=true时，用于表示登录本插件的用户名参数值|
+|passWord|登录密码|无|requireLogin=true时，用于表示登录本插件的密码参数值|
+|userName|登录用户|无|requireLogin=true时，用于表示登录本插件的用户名参数值|
 |authorMode|认证模式|auto|requireLogin=true时，认证模式可选值:query、base、auto|
 |lineNumber|行号检查点|0|反向推送服务对缓冲文件行号的检查点|
 |byteNumber|字节检查点|0|反向推送服务对缓冲文件字节位置的检查点|
