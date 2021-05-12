@@ -133,19 +133,16 @@ public class HttpService extends HttpAction {
 						break;
 					}
 					
-					config.byteNumber=raf.getFilePointer();
+					lineList.add(line.trim());
 					config.lineNumber=config.lineNumber++;
-					
-					String record=line.trim();
-					if(record.isEmpty()) continue;
-					
-					lineList.add(record);
 					if(config.httpBatchSendSize>lineList.size()) continue;
+					
 					sendDatas(response,lineList);
 					break out;
 				}
 			}
 			
+			config.byteNumber=raf.getFilePointer();
 			log.info("ServerSink plugin realtime process normal exit,execute checkpoint...");
 		}catch(Exception e){
 			log.error("ServerSink plugin realtime process running error...",e);
@@ -169,8 +166,8 @@ public class HttpService extends HttpAction {
 	}
 	
 	/**
-	 * 切换下一个日志文件
-	 * @return 是否是最后一个日志文件
+	 * 切换下一个文件
+	 * @return 是否是最后一个文件
 	 * @throws IOException 
 	 */
 	private void nextFile(RandomAccessFile randomFile) throws IOException{
@@ -187,8 +184,8 @@ public class HttpService extends HttpAction {
 	}
 	
 	/**
-	 * 是否读到最后一个日志文件
-	 * @return 是否是最后一个日志文件
+	 * 是否读到最后一个文件
+	 * @return 是否是最后一个文件
 	 */
 	private boolean isLastFile(){
 		String curFilePath=config.transferSaveFile.getAbsolutePath();

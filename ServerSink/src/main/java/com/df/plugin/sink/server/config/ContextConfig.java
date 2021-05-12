@@ -284,7 +284,7 @@ public class ContextConfig {
 	}
 	
 	/**
-	 * 刷新日志文件检查点
+	 * 刷新文件检查点
 	 * @throws IOException
 	 */
 	public void refreshCheckPoint() throws IOException{

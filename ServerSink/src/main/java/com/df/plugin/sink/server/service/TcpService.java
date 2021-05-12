@@ -102,12 +102,9 @@ public class TcpService extends AbstractTcpEventAdapter {
 						continue;
 					}
 					
-					config.byteNumber=raf.getFilePointer();
+					channel.writeAndFlush(line.trim()+config.lineSeparator);
 					config.lineNumber=config.lineNumber++;
-					
-					String record=line.trim();
-					if(record.isEmpty()) continue;
-					channel.writeAndFlush(record+config.lineSeparator);
+					config.byteNumber=raf.getFilePointer();
 				}
 			}
 		
@@ -154,8 +151,8 @@ public class TcpService extends AbstractTcpEventAdapter {
 	}
 	
 	/**
-	 * 切换下一个日志文件
-	 * @return 是否是最后一个日志文件
+	 * 切换下一个文件
+	 * @return 是否是最后一个文件
 	 * @throws IOException 
 	 */
 	private void nextFile(RandomAccessFile randomFile) throws IOException{
@@ -172,8 +169,8 @@ public class TcpService extends AbstractTcpEventAdapter {
 	}
 	
 	/**
-	 * 是否读到最后一个日志文件
-	 * @return 是否是最后一个日志文件
+	 * 是否读到最后一个文件
+	 * @return 是否是最后一个文件
 	 */
 	private boolean isLastFile(){
 		String curFilePath=config.transferSaveFile.getAbsolutePath();
