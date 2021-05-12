@@ -87,16 +87,6 @@ public class HttpConfig {
 	public String normalReply;
 	
 	/**
-	 * 登录失败标识
-	 */
-	public String loginFailureId;
-	
-	/**
-	 * 登录成功标识
-	 */
-	public String loginSuccessId;
-	
-	/**
 	 * 实时转存的日志文件
 	 */
 	public File transferSaveFile;
@@ -107,6 +97,21 @@ public class HttpConfig {
 	public boolean requireLogin;
 	
 	/**
+	 * 是否需要保持HTTP会话
+	 */
+	public boolean keepSession;
+	
+	/**
+	 * 登录失败标识
+	 */
+	public String loginFailureId;
+	
+	/**
+	 * 登录成功标识
+	 */
+	public String loginSuccessId;
+	
+	/**
 	 * 转存日志文件最大尺寸
 	 */
 	public Long transferSaveMaxSize;
@@ -115,6 +120,13 @@ public class HttpConfig {
 	 * 转存ETL通道
 	 */
 	public Channel<String> etlChannel;
+	
+	/**
+	 * 是否在登录成功之后立即推送数据
+	 * true:登录成功之后立即推送数据
+	 * false:登录成功之后再次请求才推送数据
+	 */
+	public boolean pushOnLoginSuccess;
 	
 	/**
 	 * 英文逗号正则式
@@ -198,8 +210,14 @@ public class HttpConfig {
 		log.info("transfer save file max size is: "+transferSaveMaxSize);
 		
 		//常规参数
+		String pushOnLoginSuccessStr=config.getProperty("pushOnLoginSuccess","").trim();
+		this.pushOnLoginSuccess=pushOnLoginSuccessStr.isEmpty()?false:Boolean.parseBoolean(pushOnLoginSuccessStr);
+		
 		String recvTypeStr=config.getProperty("recvType","").trim();
 		this.recvType=recvTypeStr.isEmpty()?RecvType.MessageBody:RecvType.valueOf(recvTypeStr);
+		
+		String keepSessionStr=config.getProperty("keepSession","").trim();
+		this.keepSession=keepSessionStr.isEmpty()?true:Boolean.parseBoolean(keepSessionStr);
 		
 		String loginSuccessIdStr=config.getProperty("loginSuccessId","").trim();
 		this.loginSuccessId=loginSuccessIdStr.isEmpty()?"OK":loginSuccessIdStr;

@@ -10,8 +10,8 @@ import com.df.plugin.transfer.http.config.HttpConfig;
 import com.df.plugin.transfer.http.service.TransferService;
 import com.github.lixiang2114.flow.comps.Channel;
 import com.github.lixiang2114.flow.plugins.adapter.TransferPluginAdapter;
-import com.github.lixiang2114.netty.HttpServer;
 import com.github.lixiang2114.netty.context.ServerConfig;
+import com.github.lixiang2114.netty.server.HttpServer;
 
 /**
  * @author Lixiang
@@ -47,14 +47,16 @@ public class HttpTransfer extends TransferPluginAdapter {
 			return false;
 		}
 		
-		httpConfig=new HttpConfig(flow).config();
-		serverConfig=new ServerConfig(httpConfig.port,httpConfig,TransferService.class);
+		this.httpConfig=new HttpConfig(flow).config();
+		
+		this.serverConfig=new ServerConfig(httpConfig.port,httpConfig,TransferService.class);
+		this.serverConfig.enableHttpSession=httpConfig.keepSession;
 		return true;
 	}
 	
 	@Override
 	public Object transfer(Channel<String> transferToSourceChannel) throws Exception {
-		((HttpConfig)serverConfig.servletConfig).etlChannel=transferToSourceChannel;
+		((HttpConfig)serverConfig.appConfig).etlChannel=transferToSourceChannel;
 		httpServer = new HttpServer(serverConfig);
 		log.info("start transfer save process...");
 		flow.transferStart = true;

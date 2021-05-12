@@ -1,29 +1,37 @@
 package com.df.plugin.sink.http;
 
 import java.io.File;
+import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.df.plugin.sink.http.config.HttpConfig;
-import com.df.plugin.sink.http.service.HttpService;
+import com.df.plugin.sink.http.hander.HttpSinkHandler;
+import com.df.plugin.sink.http.service.BufferService;
 import com.github.lixiang2114.flow.comps.Channel;
 import com.github.lixiang2114.flow.plugins.adapter.SinkPluginAdapter;
+import com.github.lixiang2114.flow.scheduler.SchedulerPool;
 
 /**
  * @author Lixiang
- * @description Http发送器
+ * @description HTTP发送器
  */
 public class HttpSink extends SinkPluginAdapter{
 	/**
-	 * Http连接配置
+	 * HTTP连接配置
 	 */
-	private HttpConfig httpConfig;
+	private HttpConfig config;
 	
 	/**
-	 * Http服务操作
+	 * 发送服务操作句柄
 	 */
-	private HttpService httpService;
+	private Future<?> httpSinkFuture;
+	
+	/**
+	 * 缓冲器模块配置
+	 */
+	private BufferService bufferService;
 	
 	/**
 	 * 日志工具
@@ -39,10 +47,10 @@ public class HttpSink extends SinkPluginAdapter{
 			return false;
 		}
 		
-		this.httpConfig=new HttpConfig(flow).config();
-		this.httpService=new HttpService(httpConfig);
+		this.config=new HttpConfig(flow).config();
+		this.bufferService=new BufferService(config);
 		
-		return httpService.login();
+		return true;
 	}
 
 	@Override
@@ -53,15 +61,14 @@ public class HttpSink extends SinkPluginAdapter{
 			return true;
 		}
 		
+		httpSinkFuture=SchedulerPool.getTaskExecutor().submit(new HttpSinkHandler(config));
 		flow.sinkStart=true;
-		if(!httpService.prePost()) return false;
 		
 		try{
-			String message=null;
 			while(flow.sinkStart) {
-				if(null==(message=filterToSinkChannel.get())) continue;
-				if((message=message.trim()).isEmpty()) continue;
-				if(!httpService.post(message)) return false;
+				String message=filterToSinkChannel.get(config.maxBatchWaitMills);
+				if(null==message || (message=message.trim()).isEmpty()) continue;
+				if(!bufferService.writeBuffer(message)) return false;
 			}
 		}catch(Exception e){
 			log.warn("sink plugin is interrupted while waiting...");
@@ -73,14 +80,16 @@ public class HttpSink extends SinkPluginAdapter{
 	@Override
 	public Object stop(Object params) throws Exception {
 		flow.sinkStart=false;
+		bufferService.stopBuffer();
+		httpSinkFuture.cancel(true);
 		return true;
 	}
 
 	@Override
 	public Object config(Object... params) throws Exception{
 		log.info("HttpSink plugin config...");
-		if(null==params || 0==params.length) return httpConfig.collectRealtimeParams();
-		if(params.length<2) return httpConfig.getFieldValue((String)params[0]);
-		return httpConfig.setFieldValue((String)params[0],params[1]);
+		if(null==params || 0==params.length) return config.collectRealtimeParams();
+		if(params.length<2) return config.getFieldValue((String)params[0]);
+		return config.setFieldValue((String)params[0],params[1]);
 	}
 }

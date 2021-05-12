@@ -16,18 +16,22 @@ unzip  /install/zip/httpTransfer.zip -d /software/DataFlow-3.0/plugins/
 |参数名称|参数含义|缺省默认|备注说明|
 |:-----:|:-------:|:-------:|:-------:|
 |port|服务端口|8080|HTTP服务端绑定的WEB端口，默认绑定所有网卡IP地址|
-|recvType|接收类型|MessageBody|类型可选值:ParamMap、QueryString、StreamBody、MessageBody|
-|requireLogin|是否登录|true|WEB客户端访问本插件绑定的WEB服务是否需要登录|
-|userName|用户名|无|requireLogin=true时，用于表示提交的用户名参数值|
-|passWord|密码|无|requireLogin=true时，用于表示提交的密码参数值|
+|recvType|接收类型|MessageBody|接收类型:ParamMap、QueryString、StreamBody、MessageBody|
 |userField|密码字段|无|requireLogin=true时，用于表示提交的用户名字段名称|
 |passField|用户名字段|无|requireLogin=true时，用于表示提交的密码字段名称|
+|userName|登录用户|无|requireLogin=true时，用于表示提交的用户名参数值|
+|passWord|登录密码|无|requireLogin=true时，用于表示提交的密码参数值|
 |errorReply|异常响应|NO|WEB客户端访问本插件服务发生异常时的ACK响应值|
 |normalReply|正常响应|OK|WEB客户端访问本插件服务正常时的ACK响应值|
+|keepSession|保持会话|true|本插件是否需要为登录客户端保持会话连续|
 |authorMode|认证模式|auto|requireLogin=true时，认证模式可选值:query、base、auto|
+|requireLogin|是否登录|true|WEB客户端访问本插件绑定的WEB服务是否需要登录|
 |loginFailureId|登录失败反馈|NO|requireLogin=true时，WEB客户端登录失败后接收到的ACK消息|
 |loginSuccessId|登录成功反馈|OK|requireLogin=true时，WEB客户端登录成功后接收到的ACK消息|
 |transferSaveFile|转存缓冲文件|buffer.log.0|用于转存实时消息记录的缓冲文件名|
 |transferSaveMaxSize|转存文件尺寸|2GB|转存实时消息记录的缓冲文件最大尺寸|
+|pushOnLoginSuccess|即时接收数据|false|是否在登录校验通过后即时接收终端发送的数据|
 ##### 备注：  
-认证模式authorMode参数值为auto指的是首先基于查询参数认证，当查询参数认证未通过时自动启用BASE认证，若BASE认证也未通过则认为客户端登录失败；transferSaveFile参数的默认值buffer.log.0所在路径是系统安装目录下flows子目录中对应流程实例目录下的share子目录；缓冲数据文件仅按尺寸实现滚动记录，当尺寸超过设定的阈值将按数字递增序列创建新的缓冲数据文件流，从而完成文件切换操作。
+1. recvType参数是本插件服务可接收的终端MIME类型，即终端请求的数据格式。  
+2. 认证模式authorMode参数值为auto指的是首先基于查询参数认证，当查询参数认证未通过时自动启用BASE认证，若BASE认证也未通过则认为客户端登录失败。  
+3. transferSaveFile参数的默认值buffer.log.0所在路径是系统安装目录下flows子目录中对应流程实例目录下的share子目录；缓冲数据文件仅按尺寸实现滚动记录，当尺寸超过设定的阈值将按数字递增序列创建新的缓冲数据文件流，从而完成文件切换操作。

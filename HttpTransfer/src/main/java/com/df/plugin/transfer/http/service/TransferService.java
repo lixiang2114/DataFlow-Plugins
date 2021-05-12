@@ -15,6 +15,7 @@ import com.github.lixiang2114.flow.util.CommonUtil;
 import com.github.lixiang2114.netty.handlers.PrintWriter;
 import com.github.lixiang2114.netty.scope.HttpServletRequest;
 import com.github.lixiang2114.netty.scope.HttpServletResponse;
+import com.github.lixiang2114.netty.scope.HttpSession;
 import com.github.lixiang2114.netty.servlet.HttpAction;
 
 /**
@@ -26,6 +27,11 @@ public class TransferService extends HttpAction {
 	 * Http转存配置
 	 */
 	private HttpConfig httpConfig;
+	
+	/**
+	 * 是否在登录校验通过后立即接收数据
+	 */
+	private boolean loginAndRecv;
 	
 	/**
 	 * 文件写出器
@@ -44,7 +50,8 @@ public class TransferService extends HttpAction {
 	
 	@Override
 	public void init() throws IOException {
-		this.httpConfig=(HttpConfig)serverConfig.servletConfig;
+		this.httpConfig=(HttpConfig)serverConfig.appConfig;
+		this.loginAndRecv=httpConfig.pushOnLoginSuccess;
 		this.authorService = new AuthorService(httpConfig);
 		this.fileWriter=Files.newBufferedWriter(httpConfig.transferSaveFile.toPath(),StandardOpenOption.CREATE,StandardOpenOption.APPEND);
 	}
@@ -71,9 +78,9 @@ public class TransferService extends HttpAction {
 	 */
 	public boolean loginCheck(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if(!httpConfig.requireLogin) return true;
-		if(null!=request.getSession().getAttribute("loginUser")) return true;
-		
-		log.info("current client is not logged, verify the login...");
+		HttpSession session=request.getSession();
+		if(null!=session && null!=session.getAttribute("loginUser")) return true;
+		if(!loginAndRecv) log.info("current client is not logged, verify the login...");
 		
 		Boolean flag=null;
 		switch(httpConfig.authorMode){
@@ -89,15 +96,16 @@ public class TransferService extends HttpAction {
 		
 		String validateResult=httpConfig.loginFailureId;
 		if(null==flag) {
-			log.info("parameter config is error,Client Login Failure!");
+			log.error("uri:{} parameter config is error,Client Login Failure!",request.getRequestURI());
 		}else if(!flag) {
-			log.info("userName or passWord is Error,Client Login Failure!");
+			log.error("uri:{} userName or passWord is Error,Client Login Failure!",request.getRequestURI());
 		}else {
-			log.info("Client Login Success!");
 			validateResult=httpConfig.loginSuccessId;
-			request.getSession().setAttribute("loginUser", request.getAttribute("loginUser"));
+			if(!loginAndRecv) log.info("Client Login Success!");
+			if(null!=session) session.setAttribute("loginUser", request.getAttribute("loginUser"));
 		}
 		
+		if(loginAndRecv && null!=flag && flag) return true;
 		writeACK(response,validateResult);
 		return false;
 	}
