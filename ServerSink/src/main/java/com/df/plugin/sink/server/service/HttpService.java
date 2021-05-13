@@ -125,12 +125,21 @@ public class HttpService extends HttpAction {
 				while(config.flow.sinkStart) {
 					String line=raf.readLine();
 					if(null==line) {
-						if(isLastFile()) {
-							sendDatas(response,lineList);
-							break out;
+						if(!isLastFile()) {
+							nextFile(raf);
+							break;
 						}
-						nextFile(raf);
-						break;
+						
+						if(lineList.isEmpty()) {
+							try{
+								Thread.sleep(1000L); //延迟1秒,避免发生内存泄露
+							}catch(InterruptedException e){
+								log.warn("ServerSink sleep interrupted,realtime process is over...");
+							}
+						}
+						
+						sendDatas(response,lineList);
+						break out;
 					}
 					
 					lineList.add(line.trim());
